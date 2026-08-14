@@ -63,9 +63,10 @@ namespace DataAnalyzer
 			//Writes the contents for the strain offset text box (strain vs strain)
 			temp = "Offset Strain (microstrain): ";
 			for (i = 0; i < analyze.RawData.Length; i++){
-				if (analyze.RawData[i].TranChan != 0){
+				int nuIndex = analyze.TranIndexForFile(i);
+				if (nuIndex >= 0){
 					j = i + 1;
-				temp = temp + "File " + j + ": " + analyze.ZeroNUData[i].OffsetData.StrainOffset.ToString("N3") + "               ";
+					temp = temp + "File " + j + ": " + analyze.ZeroNUData[nuIndex].OffsetData.StrainOffset.ToString("N3") + "               ";
 				}
 			}
 			taOffsetTxtBox.Text = temp;	

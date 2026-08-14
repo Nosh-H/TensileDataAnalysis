@@ -30,6 +30,7 @@ namespace DataAnalyzer.Math
 		private Averager[] aveData;
 		private Zeroer[] zeroData;
 		private Zeroer[] zeroNUData;
+		private int [] tranIndexForFile;
 		private double [,] combinedData;
 		private double [,] combinedNUData;
 		private Combination total;
@@ -150,6 +151,16 @@ namespace DataAnalyzer.Math
 			// Coefficients/FinalCout to draw the pooled stress-vs-strain and modulus-vs-strain plots.
 			total = new Combination(combinedData, locPolyOrder, globPolyOrder, interval);
 
+			// Maps a specimen's index in the full file list to its slot in the densely-packed
+			// zeroNUData array, or -1 for specimens with no transverse gauge.  Consumers
+			// (FileWriter, PlotMaker, ResultsWindow) must go through this rather than indexing
+			// zeroNUData with the full-specimen index, which only lines up when every transverse
+			// specimen happens to be loaded first.
+			tranIndexForFile = new int [numberofFiles];
+			for (i = 0; i < numberofFiles; i++){
+				tranIndexForFile[i] = -1;
+			}
+
 			//now do the same thing for transverse strain data (to find NU)
 			if (numberofTranFiles != 0){
 				// Same idea as above, but using transverse strain (x) vs. axial strain (y) instead of
@@ -165,6 +176,7 @@ namespace DataAnalyzer.Math
 					if (rawData[i].TranChan != 0){
 						zeroNUData[t] = new Zeroer(aveData[i].AveragedData, locPolyOrder, globPolyOrder, interval, cutoff, 1, 2, offsetArray);
 						sum = sum + zeroNUData[t].ZeroedData.GetUpperBound(0)+1;
+						tranIndexForFile[i] = t;
 						t++;
 					}
 				}
@@ -358,6 +370,15 @@ namespace DataAnalyzer.Math
 		}
 		public Zeroer[] ZeroNUData{
 			get{return zeroNUData;}
+		}
+		/// <summary>
+		/// For a specimen's index in the full file list, its slot in the densely-packed
+		/// ZeroNUData array, or -1 if that specimen has no transverse gauge.  Always index
+		/// ZeroNUData through this -- the two arrays only agree when every transverse specimen
+		/// was loaded before every non-transverse one.
+		/// </summary>
+		public int TranIndexForFile(int fileIndex){
+			return tranIndexForFile[fileIndex];
 		}
 		public double Cutoff{
 			get{return cutoff;}

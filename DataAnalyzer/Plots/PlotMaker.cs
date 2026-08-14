@@ -84,7 +84,9 @@ namespace DataAnalyzer.Plots
 						PointPairList list8 = new PointPairList();
 						PointPairList list9 = new PointPairList();
 						for (i = 0; i < numberofFiles; i++){
-							if (analyze.RawData[i].TranChan != 0){
+							//ZeroNUData is packed densely, so go through the map rather than indexing it with i
+							int nuIndex = analyze.TranIndexForFile(i);
+							if (nuIndex >= 0){
 								for (k = 0; k < analyze.RawData[i].TranChan; k ++){
 									for (j = 0; j < analyze.RawData[i].RawData.GetUpperBound(0)+1; j++){
 										list7.Add(analyze.AveData[i].AveragedData[j,1], analyze.RawData[i].RawData[j,1+analyze.RawData[i].AxChan+k]);
@@ -92,10 +94,10 @@ namespace DataAnalyzer.Plots
 								}
 								for (j = 0; j < analyze.AveData[i].AveragedData.GetUpperBound(0)+1; j++){
 									list8.Add(analyze.AveData[i].AveragedData[j,1], analyze.AveData[i].AveragedData[j,2]);
-								} 
-								for (j = 0; j < analyze.ZeroNUData[i].ZeroedData.GetUpperBound(0)+1; j++){
-									list9.Add(analyze.ZeroNUData[i].ZeroedData[j,1], analyze.ZeroNUData[i].ZeroedData[j,0]);
-								} 
+								}
+								for (j = 0; j < analyze.ZeroNUData[nuIndex].ZeroedData.GetUpperBound(0)+1; j++){
+									list9.Add(analyze.ZeroNUData[nuIndex].ZeroedData[j,1], analyze.ZeroNUData[nuIndex].ZeroedData[j,0]);
+								}
 							}
 						}
 						Plot3 pl3b = new Plot3(list7, list8, list9, "All Specimens: " + material + ": " + temperature + "K ", "Axial Strain",
@@ -107,7 +109,8 @@ namespace DataAnalyzer.Plots
 						PointPairList list10 = new PointPairList();
 						PointPairList list11 = new PointPairList();
 						PointPairList list12 = new PointPairList();
-						if (analyze.RawData[i].TranChan == 0){
+						int nuIndex4 = analyze.TranIndexForFile(i);
+						if (nuIndex4 < 0){
 							MessageBox.Show("file has no Transverse Strain data");
 						}
 						else{
@@ -118,10 +121,11 @@ namespace DataAnalyzer.Plots
 							}
 							for (j = 0; j < analyze.AveData[i].AveragedData.GetUpperBound(0)+1; j++){
 								list11.Add(analyze.AveData[i].AveragedData[j,1], analyze.AveData[i].AveragedData[j,2]);
-							} 
-							for (j = 0; j < analyze.ZeroData[i].ZeroedData.GetUpperBound(0)+1; j++){
-								list12.Add(analyze.ZeroNUData[i].ZeroedData[j,1], analyze.ZeroNUData[i].ZeroedData[j,0]);
-							} 
+							}
+							//Bound by the array actually being indexed, not the stress/strain zeroer
+							for (j = 0; j < analyze.ZeroNUData[nuIndex4].ZeroedData.GetUpperBound(0)+1; j++){
+								list12.Add(analyze.ZeroNUData[nuIndex4].ZeroedData[j,1], analyze.ZeroNUData[nuIndex4].ZeroedData[j,0]);
+							}
 					
 							Plot3 pl3c = new Plot3(list10, list11, list12, "Specimen "+ fileNumber + ": " + material + ": " + temperature + "K "
 							                       , "Strain", "Stress",  "Raw Data","Average", "Zeroed");
@@ -143,7 +147,6 @@ namespace DataAnalyzer.Plots
 						} 
 						double tempx;
 						for (j = 0; j < 500; j++){
-								Polynomial poly = new Polynomial();
 								tempx = 0 + (analyze.Cutoff/500)*j;
 								list16.Add(tempx, Polynomial.EvaluatePolynomial(tempx,analyze.Total.FinalCout));
 							}
@@ -168,7 +171,6 @@ namespace DataAnalyzer.Plots
 						}
 						double tempx;
 						for (j = 0; j < 500; j++){
-								Polynomial poly = new Polynomial();
 								tempx = analyze.ZeroData[i].OffsetData.StrainOffset + (analyze.Cutoff/500)*j;
 								list19.Add(tempx, Polynomial.EvaluatePolynomial(tempx,analyze.ZeroData[i].TotalCout));
 							}
@@ -199,7 +201,6 @@ namespace DataAnalyzer.Plots
 						}
 						double tempx;
 						for (j = 0; j < 500; j++){
-								Polynomial poly = new Polynomial();
 								tempx = 0 + (analyze.Cutoff/500)*j;
 									list22.Add(tempx, Polynomial.EvaluatePolynomial(tempx,analyze.NU.FinalCout));
 							}
@@ -216,7 +217,8 @@ namespace DataAnalyzer.Plots
 						PointPairList list23 = new PointPairList();
 						PointPairList list24 = new PointPairList();
 						PointPairList list25 = new PointPairList();
-						if (analyze.RawData[i].TranChan == 0){
+						int nuIndex8 = analyze.TranIndexForFile(i);
+						if (nuIndex8 < 0){
 							MessageBox.Show("file has no Transverse Strain data");
 						}
 						else{
@@ -225,17 +227,16 @@ namespace DataAnalyzer.Plots
 								list22.Add(analyze.AveData[i].AveragedData[j,1], analyze.AveData[i].AveragedData[j,2]);
 								}
 							}
-							for (j = 0; j < analyze.ZeroNUData[i].MeanData.GetUpperBound(0)+1; j++){
-								list23.Add(analyze.ZeroNUData[i].MeanData[j,1], analyze.ZeroNUData[i].MeanData[j,0]);
-								list24.Add(analyze.ZeroNUData[i].MeanData[j,1], 
-								           analyze.ZeroNUData[i].MeanData[j,0] + analyze.ZeroNUData[i].SECoefficients[j,0],
-								          analyze.ZeroNUData[i].MeanData[j,0] - analyze.ZeroNUData[i].SECoefficients[j,0]);
-							} 
+							for (j = 0; j < analyze.ZeroNUData[nuIndex8].MeanData.GetUpperBound(0)+1; j++){
+								list23.Add(analyze.ZeroNUData[nuIndex8].MeanData[j,1], analyze.ZeroNUData[nuIndex8].MeanData[j,0]);
+								list24.Add(analyze.ZeroNUData[nuIndex8].MeanData[j,1],
+								           analyze.ZeroNUData[nuIndex8].MeanData[j,0] + analyze.ZeroNUData[nuIndex8].SECoefficients[j,0],
+								          analyze.ZeroNUData[nuIndex8].MeanData[j,0] - analyze.ZeroNUData[nuIndex8].SECoefficients[j,0]);
+							}
 							double tempx;
 							for (j = 0; j < 500; j++){
-								Polynomial poly = new Polynomial();
 								tempx = 0 + (analyze.Cutoff/500)*j;
-									list25.Add(tempx, Polynomial.EvaluatePolynomial(tempx,analyze.ZeroNUData[i].TotalCout));
+									list25.Add(tempx, Polynomial.EvaluatePolynomial(tempx,analyze.ZeroNUData[nuIndex8].TotalCout));
 							}
 						
 						Plot3e pl2c = new Plot3e(list22, list23, list24, list25, "Specimen "+ fileNumber + ": " 
@@ -362,33 +363,36 @@ namespace DataAnalyzer.Plots
 						PointPairList list25e = new PointPairList();
 						PointPairList list26e = new PointPairList();
 						PointPairList list27 = new PointPairList();
-						if (analyze.RawData[i].TranChan == 0){
+						int nuIndex12 = analyze.TranIndexForFile(i);
+						if (nuIndex12 < 0){
 							MessageBox.Show("file has no Transverse Strain data");
 						}
 						else{
-							for (j = 0; j < analyze.ZeroNUData[i].MeanData.GetUpperBound(0)+1; j++){
+							for (j = 0; j < analyze.ZeroNUData[nuIndex12].MeanData.GetUpperBound(0)+1; j++){
 								temp = 0;
 								for (k = 0; k < analyze.LocPolyOrder; k++){
-									temp = temp + ((analyze.ZeroNUData[i].Coefficients[j,k+1])* System.Math.Pow(analyze.ZeroNUData[i].MeanData[j,1],k));
+									temp = temp + ((analyze.ZeroNUData[nuIndex12].Coefficients[j,k+1])* System.Math.Pow(analyze.ZeroNUData[nuIndex12].MeanData[j,1],k));
 								}
-								list25.Add(analyze.ZeroNUData[i].MeanData[j,1], analyze.ZeroNUData[i].Coefficients[j,1]);
+								//Plot the local tangent that was just summed, matching PlotMaker9/10/11
+								//and the error bars on the next line, which are already built from temp
+								list25.Add(analyze.ZeroNUData[nuIndex12].MeanData[j,1], temp);
 								if (analyze.LocPolyOrder > 0){
-								list25e.Add(analyze.ZeroNUData[i].MeanData[j,1], 
-							            temp+analyze.ZeroNUData[i].SECoefficients[j,1],
-							           temp-analyze.ZeroNUData[i].SECoefficients[j,1]);
+								list25e.Add(analyze.ZeroNUData[nuIndex12].MeanData[j,1],
+							            temp+analyze.ZeroNUData[nuIndex12].SECoefficients[j,1],
+							           temp-analyze.ZeroNUData[nuIndex12].SECoefficients[j,1]);
 								}
 							}
-							for (j = 0; j < analyze.ZeroNUData[i].SecantSlope.GetUpperBound(0)+1; j++){
-								list26.Add(analyze.ZeroNUData[i].MeanData[j,1], analyze.ZeroNUData[i].SecantSlope[j]);
-								list26e.Add(analyze.ZeroNUData[i].MeanData[j,1], 
-								            analyze.ZeroNUData[i].SecantSlope[j] + analyze.ZeroNUData[i].SESecantSlope[j],
-								           analyze.ZeroNUData[i].SecantSlope[j] - analyze.ZeroNUData[i].SESecantSlope[j]);
+							for (j = 0; j < analyze.ZeroNUData[nuIndex12].SecantSlope.GetUpperBound(0)+1; j++){
+								list26.Add(analyze.ZeroNUData[nuIndex12].MeanData[j,1], analyze.ZeroNUData[nuIndex12].SecantSlope[j]);
+								list26e.Add(analyze.ZeroNUData[nuIndex12].MeanData[j,1],
+								            analyze.ZeroNUData[nuIndex12].SecantSlope[j] + analyze.ZeroNUData[nuIndex12].SESecantSlope[j],
+								           analyze.ZeroNUData[nuIndex12].SecantSlope[j] - analyze.ZeroNUData[nuIndex12].SESecantSlope[j]);
 								temp = 0;
 								for (k = 0; k < analyze.GlobPolyOrder; k++){
-									temp = temp + ((analyze.ZeroNUData[i].TotalCout[k+1,0])* System.Math.Pow(analyze.ZeroNUData[i].MeanData[j,1],k));
+									temp = temp + ((analyze.ZeroNUData[nuIndex12].TotalCout[k+1,0])* System.Math.Pow(analyze.ZeroNUData[nuIndex12].MeanData[j,1],k));
 								}
-							list27.Add(analyze.ZeroNUData[i].MeanData[j,1],temp);
-							} 
+							list27.Add(analyze.ZeroNUData[nuIndex12].MeanData[j,1],temp);
+							}
 							Plot3e2 pl2a = new Plot3e2(list25, list25e, list26, list26e, list27, "Specimen "+ fileNumber 
 							                         + ": " + material + ": " + temperature + "K ",
 							                       "Axial Strain","Poisson's Ratio", "Local Tangent", 
@@ -433,21 +437,22 @@ namespace DataAnalyzer.Plots
 						PointPairList list14 = new PointPairList();
 						PointPairList list15 = new PointPairList();
 						PointPairList list16 = new PointPairList();
-						Polynomial poly = new Polynomial();
 
-			for (j = 0; j < analyze.ZeroData[fileNumber].MeanData.GetLength(0); j++)
+			//fileNumber is 1-based, as in every other plot method
+			i = fileNumber - 1;
+			for (j = 0; j < analyze.ZeroData[i].MeanData.GetLength(0); j++)
 			{
-				list14.Add(analyze.ZeroData[fileNumber].MeanData[j, 1], analyze.ZeroData[fileNumber].MeanData[j, 0]);
-				list15.Add(analyze.ZeroData[fileNumber].MeanData[j, 1], analyze.ZeroData[fileNumber].MeanData[j, 0] 
-					+ analyze.ZeroData[fileNumber].SECoefficients[j,0],
-					  analyze.ZeroData[fileNumber].MeanData[j, 0] - analyze.ZeroData[fileNumber].SECoefficients[j, 0]);
+				list14.Add(analyze.ZeroData[i].MeanData[j, 1], analyze.ZeroData[i].MeanData[j, 0]);
+				list15.Add(analyze.ZeroData[i].MeanData[j, 1], analyze.ZeroData[i].MeanData[j, 0]
+					+ analyze.ZeroData[i].SECoefficients[j,0],
+					  analyze.ZeroData[i].MeanData[j, 0] - analyze.ZeroData[i].SECoefficients[j, 0]);
 			}
-			list16.Add(0, Polynomial.EvaluatePolynomial(0, analyze.ZeroData[fileNumber].OffsetData.COut_YieldOffset));
-			list16.Add(1.1 * analyze.ZeroData[fileNumber].OffsetData.YieldStrain,
-                        Polynomial.EvaluatePolynomial(1.1 * analyze.ZeroData[fileNumber].OffsetData.YieldStrain, 
-					   analyze.ZeroData[fileNumber].OffsetData.COut_YieldOffset));
-			list13.Add(analyze.ZeroData[fileNumber].OffsetData.YieldStrain,
-					  analyze.ZeroData[fileNumber].OffsetData.YieldStress);
+			list16.Add(0, Polynomial.EvaluatePolynomial(0, analyze.ZeroData[i].OffsetData.COut_YieldOffset));
+			list16.Add(1.1 * analyze.ZeroData[i].OffsetData.YieldStrain,
+                        Polynomial.EvaluatePolynomial(1.1 * analyze.ZeroData[i].OffsetData.YieldStrain,
+					   analyze.ZeroData[i].OffsetData.COut_YieldOffset));
+			list13.Add(analyze.ZeroData[i].OffsetData.YieldStrain,
+					  analyze.ZeroData[i].OffsetData.YieldStress);
 
 			/*
 						for (j = 0; j < analyze.Total.MeanData.GetUpperBound(0)+1; j++){
@@ -489,10 +494,11 @@ namespace DataAnalyzer.Plots
             {
                 zeroedList.Add(analyze.ZeroData[i].ZeroedData[j, 1], analyze.ZeroData[i].ZeroedData[j, 0]);
             }
-			//Raw Data used for Zeroeing
+			//Raw Data used for Zeroeing.  RawDataForFit holds y in column 0 and x in column 1
+			//(see Offset), so both components of the point come from that one array.
             for (j = 0; j < analyze.ZeroData[i].OffsetData.RawDataForFit.GetUpperBound(0) + 1; j++)
             {
-                linearZeroedList.Add(analyze.ZeroData[i].OffsetData.RawDataForFit[j, 1], analyze.ZeroData[i].ZeroedData[j, 0]);
+                linearZeroedList.Add(analyze.ZeroData[i].OffsetData.RawDataForFit[j, 1], analyze.ZeroData[i].OffsetData.RawDataForFit[j, 0]);
             }
 
 

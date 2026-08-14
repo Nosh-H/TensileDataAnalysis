@@ -123,14 +123,16 @@ namespace DataAnalyzer
 			 * for the strain/strain data (along with the poly. coefficients for the fit.*/
 			
 			for (i = 0; i < numberofFiles; i++){
-				if (analyze.RawData[i].TranChan != 0){
+				//ZeroNUData is packed densely, so go through the map rather than indexing it with i
+				int nuIndex = analyze.TranIndexForFile(i);
+				if (nuIndex >= 0){
 					dataWrite = new StreamWriter(analyze.RawData[i].Root + "DataHandlingNU.csv");
 					dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 				                   + temperature + "\n (ms = microstrain)");
 					dataWrite.WriteLine(" ");
 					dataWrite.WriteLine("Cutoff Strain (ms)," + analyze.Cutoff + ",Local Polynomial Order," + analyze.LocPolyOrder
 				                    + ",Global Polynomial Order," + analyze.GlobPolyOrder
-				                    + ",Interval," + analyze.Interval + ",Strain Offset," + analyze.ZeroNUData[i].OffsetData.StrainOffset);
+				                    + ",Interval," + analyze.Interval + ",Strain Offset," + analyze.ZeroNUData[nuIndex].OffsetData.StrainOffset);
 					dataWrite.WriteLine(" ");
 				
 					dataWrite.Write("Raw Data (converted to strains),");
@@ -162,14 +164,14 @@ namespace DataAnalyzer
 						}
 						dataWrite.Write("," + analyze.AveData[i].AveragedData[j,2]);
 						dataWrite.Write("," + analyze.AveData[i].AveragedData[j,1]);
-						if (j < analyze.ZeroNUData[i].ZeroedData.GetUpperBound(0)+1){
-							dataWrite.Write("," + analyze.ZeroNUData[i].ZeroedData[j,0]);
-							dataWrite.Write("," + analyze.ZeroNUData[i].ZeroedData[j,1]);
+						if (j < analyze.ZeroNUData[nuIndex].ZeroedData.GetUpperBound(0)+1){
+							dataWrite.Write("," + analyze.ZeroNUData[nuIndex].ZeroedData[j,0]);
+							dataWrite.Write("," + analyze.ZeroNUData[nuIndex].ZeroedData[j,1]);
 						}
 						if (j == 0){
 							for (k = 0; k < analyze.GlobPolyOrder+1; k++){
-								dataWrite.Write("," + analyze.ZeroNUData[i].TotalCout[k,0]);
-							}	
+								dataWrite.Write("," + analyze.ZeroNUData[nuIndex].TotalCout[k,0]);
+							}
 						}
 					}
 					dataWrite.Close();	
@@ -181,15 +183,21 @@ namespace DataAnalyzer
 		 * files and fit a curve to them for the strain-strain data*/
 			
 			for (i = 0; i < numberofFiles; i++){
+				//Only specimens with a transverse gauge have NU data to write.  ZeroNUData is
+				//packed densely, so go through the map rather than indexing it with i.
+				int nuIndex = analyze.TranIndexForFile(i);
+				if (nuIndex < 0){
+					continue;
+				}
 				dataWrite = new StreamWriter(analyze.RawData[i].Root + "LoessDataNU.csv");
 				dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 				                   + temperature + "\n (ms = microstrain)");
 				dataWrite.WriteLine(" ");
 				dataWrite.WriteLine("Local Polynomial Order," + analyze.LocPolyOrder
-				                    + ",Global Polynomial Order," + analyze.GlobPolyOrder 
+				                    + ",Global Polynomial Order," + analyze.GlobPolyOrder
 				                    + ",Interval," + analyze.Interval);
 				dataWrite.WriteLine(" ");
-				
+
 				if (analyze.ZeroData[i].OffsetData.OffsetFlag == 1){
 					dataWrite.Write(",% Offset," + analyze.ZeroData[i].OffsetData.PercentOffset + ",R^2 Minimum," + analyze.ZeroData[i].OffsetData.RMin);
 					dataWrite.Write("Yield Stress," + analyze.ZeroData[i].OffsetData.YieldStress + "Yield Strain," + analyze.ZeroData[i].OffsetData.YieldStrain + "Offset," + analyze.ZeroData[i].OffsetData.StrainOffset
@@ -197,24 +205,25 @@ namespace DataAnalyzer
 				}
 				
 				
+				//A polynomial of order n has n+1 coefficients, matching FileWriter2/5/6
 				dataWrite.Write("Mean Transverse Strain (ms),Mean Axial Strain (ms), # of Points, Secant NU, error ");
-				for (j = 0; j < analyze.LocPolyOrder; j++){
+				for (j = 0; j < analyze.LocPolyOrder+1; j++){
 					dataWrite.Write(",A" + j + " Coeff., error");
 				}
 				dataWrite.Write(",Sigma");
-				
-				for (j = 0; j < analyze.ZeroData[i].MeanData.GetUpperBound(0)+1; j++){
-					dataWrite.Write("\n" + analyze.ZeroNUData[i].MeanData[j,0]);
-					dataWrite.Write("," + analyze.ZeroNUData[i].MeanData[j,1]);
-					dataWrite.Write("," + analyze.ZeroNUData[i].N[j]);
-					dataWrite.Write("," + analyze.ZeroNUData[i].SecantSlope[j]);
-					dataWrite.Write("," + analyze.ZeroNUData[i].SESecantSlope[j]);
-					for (k = 0; k < analyze.LocPolyOrder; k++){
-						dataWrite.Write("," + analyze.ZeroNUData[i].Coefficients[j,k]);
-						dataWrite.Write("," + analyze.ZeroNUData[i].SECoefficients[j,k]);
+
+				//Bound the loop by the array actually being indexed
+				for (j = 0; j < analyze.ZeroNUData[nuIndex].MeanData.GetUpperBound(0)+1; j++){
+					dataWrite.Write("\n" + analyze.ZeroNUData[nuIndex].MeanData[j,0]);
+					dataWrite.Write("," + analyze.ZeroNUData[nuIndex].MeanData[j,1]);
+					dataWrite.Write("," + analyze.ZeroNUData[nuIndex].N[j]);
+					dataWrite.Write("," + analyze.ZeroNUData[nuIndex].SecantSlope[j]);
+					dataWrite.Write("," + analyze.ZeroNUData[nuIndex].SESecantSlope[j]);
+					for (k = 0; k < analyze.LocPolyOrder+1; k++){
+						dataWrite.Write("," + analyze.ZeroNUData[nuIndex].Coefficients[j,k]);
+						dataWrite.Write("," + analyze.ZeroNUData[nuIndex].SECoefficients[j,k]);
 					}
-					dataWrite.Write("," + analyze.ZeroNUData[i].Sigma[j]);
-					
+					dataWrite.Write("," + analyze.ZeroNUData[nuIndex].Sigma[j]);
 				}
 				dataWrite.Close();	
 			}

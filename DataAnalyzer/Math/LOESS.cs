@@ -56,8 +56,8 @@ namespace DataAnalyzer.Math
 			 * along with all of the polynomial coefficients and their associated errors.
 			 * inX and inY are the data input arrays.  
 			 * LOESSSpan is the x width of the interval considered for the LOESS analysis.
-			 * Note: This program can only handle 5000 points per interval.  to ramp that 
-			 *  number up, change the 5000 value on lines 91 and 92.*/
+			 * There is no cap on the number of points per interval: each interval's temporary
+			 * arrays are sized to the number of points that actually fall inside it.*/
 			int i = 0;
 			int j, k, l, Count;
 			int Flag = 0;
@@ -75,29 +75,35 @@ namespace DataAnalyzer.Math
 			Xend = Xstart + LOESSSpan;
 			while (Flag == 0){
 				k = 0;
-				if (i >= Xbar.Length){ 
-					//Checks to see if the interval is larger than the actual interval of the data
-					//throw new ArgumentNullException();
+				if (i >= Xbar.Length){
+					//The caller sized Xbar from the span, so overrunning it means the interval is
+					//too small for this data.  MainForm turns this into "Invalid Interval, Please
+					//reduce and try again" rather than an out-of-bounds write.
+					throw new ArgumentNullException();
 				}
 				Xbar[i] = (Xend + Xstart)/2;
-				
-				//Redimension Temp arrays to 5000 (max interval points = 5000)
-				ReDim(ref TempX, 5000);
-    			ReDim(ref TempY, 5000);
+
+				//Size the temp arrays to the points that actually fall in this interval
+				int intervalCount = 0;
+				for (j = 0; j < Count; j++){
+					if (inX[j] > Xstart && inX[j] <= Xend){
+						intervalCount++;
+					}
+				}
+				// Redimension the temp arrays
+				ReDim(ref TempX, intervalCount);
+				ReDim(ref TempY, intervalCount);
 				for (j = 0; j < Count; j++){
 					//Cycles through all x to pick out those within the interval
 					if (inX[j] > Xstart && inX[j] <= Xend){
-						//assigns the x and y in the interval into temporary arrays, and 
+						//assigns the x and y in the interval into temporary arrays, and
 						//causes xbar to be zero (apparently, gets rid of error)
 						TempX[k] = inX[j]-Xbar[i];
 						TempY[k] = inY[j];
 						k=k+1;
 					}
 				}
-    			ReDim(ref TempX, k);
-    			ReDim(ref TempY, k);
-    			//Redimension arrays TempX and Y to get rid of zeros
-    			
+
 				Polynomial LOESSPoly = new Polynomial();
 				LOESSPoly.PolynomialFit(inPolynomialOrder, TempX, TempY, out Cout, 
 				                        out SEi, out Rsquared, out residualSumSquared);
