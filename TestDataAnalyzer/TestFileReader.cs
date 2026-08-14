@@ -3,12 +3,11 @@
  * User: e46221
  * Date: 7/11/2007
  * Time: 3:40 PM
- * 
- * To change this template use Tools | Options | Coding | Edit Standard Headers.
  */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 using DataAnalyzer;
 
 namespace TestStressStrainData
@@ -16,46 +15,106 @@ namespace TestStressStrainData
 	[TestClass]
 	public class TestFileReader
 	{
-		[TestMethod]
-		public void TestMethod()
+		private const double AcceptablePrecision = 1.0E-9;
+
+		/// <summary>
+		/// Resolves a fixture in TestFiles/ to the "root" form FileReader expects: a full path
+		/// with the ".csv" extension stripped, since FileReader appends ".csv" itself.
+		/// The CSVs are copied next to the test assembly by TestDataAnalyzer.csproj.
+		/// </summary>
+		private static string FixtureRoot(string fileNameWithoutExtension)
 		{
-			//Test only works if the StressStrainData is in the D drive!!!
-			string root = "D:\\C# Projects\\StressStrainData\\TestCases\\FileReaderTest";
-			int tranChan = 2;
-			int axChan = 2;
-			double length = 1;
-			double xSecArea = 1;
-			int startRow = 3;
-			double acceptablePrecision = 1.0E-9;
-			FileReader myrawData = new FileReader(root, axChan, tranChan, length, xSecArea, startRow,  1000, 1, 0, 0);
-			
-			Assert.AreEqual( 303.933562, myrawData.RawData[0,0] ,acceptablePrecision);
-			
-			
-			//Additional plotting function to visually see that data is being read properly
-			/*double [] inX1 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inY1 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inX2 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inX3 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inX4 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inY2 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inY3 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			double [] inY4 = new double [rawData[0].RawData.GetUpperBound(0)+1];
-			
-			 * for (i = 0; i < myrawData[0].RawData.GetUpperBound(0)+1; i++){
-				inY1[i] = myrawData[0].RawData[i,0];
-				inX1[i] = myrawData[0].RawData[i,1];
-				inX2[i] = myrawData[0].RawData[i,2];
-				inX3[i] = myrawData[0].RawData[i,3];
-				inX4[i] = myrawData[0].RawData[i,4];
-			}
-			inY2 = inY1;
-			inY3 = inY1;
-			inY4 = inY1;
-							
-			Plot4 pl2= new Plot4(inX1, inY1, inX2, inY2, inX3, inY3, inX4, inY4,
-			                     "test", "strain (microstrain)", "stress (psi)", "ax1","ax2","ax3","ax4");
-		*/
+			string testDirectory = Path.GetDirectoryName(typeof(TestFileReader).Assembly.Location);
+			return Path.Combine(testDirectory, "TestFiles", fileNameWithoutExtension);
+		}
+
+		/// <summary>
+		/// SampleInput_Specimen1.csv has two header rows, then "strain,stress" data pairs.
+		/// Reading it with area and gauge length of 1 should pass the values through unchanged,
+		/// with column 0 holding stress and column 1 holding axial strain.
+		/// </summary>
+		[TestMethod]
+		public void TestReadsStrainStressColumns()
+		{
+			// rowStart is the 1-based line number of the first data row; strain is column 1 and
+			// stress column 2 (both 1-based). rowEnd is past the end of the file, so all rows load.
+			FileReader rawData = new FileReader(FixtureRoot("SampleInput_Specimen1"),
+			                                    inaxChan: 1, intranChan: 0,
+			                                    inlength: 1.0, inxSecArea: 1.0,
+			                                    inrowStart: 3, inrowEnd: 10000,
+			                                    inStrainCol: 1, inStressCol: 2, indispflag: 0);
+
+			// Column 0 = stress, column 1 = axial strain, straight from the first data row "0,0.2758"
+			Assert.AreEqual(0.2758, rawData.RawData[0, 0], AcceptablePrecision);
+			Assert.AreEqual(0.0, rawData.RawData[0, 1], AcceptablePrecision);
+
+			// Second data row: "0.002228758,0.6853"
+			Assert.AreEqual(0.6853, rawData.RawData[1, 0], AcceptablePrecision);
+			Assert.AreEqual(0.002228758, rawData.RawData[1, 1], AcceptablePrecision);
+
+			// One stress column plus one axial strain channel
+			Assert.AreEqual(2, rawData.RawData.GetLength(1));
+			Assert.AreEqual(0, rawData.TranChan);
+			Assert.AreEqual(1, rawData.AxChan);
+		}
+
+		/// <summary>
+		/// Force is divided by the cross-sectional area to get stress, and displacement by the
+		/// gauge length to get strain. Passing non-unit values must scale both columns.
+		/// </summary>
+		[TestMethod]
+		public void TestConvertsForceAndDisplacement()
+		{
+			const double area = 4.0;
+			const double gaugeLength = 2.0;
+
+			FileReader rawData = new FileReader(FixtureRoot("SampleInput_Specimen1"),
+			                                    inaxChan: 1, intranChan: 0,
+			                                    inlength: gaugeLength, inxSecArea: area,
+			                                    inrowStart: 3, inrowEnd: 10000,
+			                                    inStrainCol: 1, inStressCol: 2, indispflag: 0);
+
+			Assert.AreEqual(0.6853 / area, rawData.RawData[1, 0], AcceptablePrecision);
+			Assert.AreEqual(0.002228758 / gaugeLength, rawData.RawData[1, 1], AcceptablePrecision);
+			Assert.AreEqual(area, rawData.XSecArea, AcceptablePrecision);
+			Assert.AreEqual(gaugeLength, rawData.Length, AcceptablePrecision);
+		}
+
+		/// <summary>
+		/// rowEnd bounds how many rows are read past rowStart, so a narrow window must yield
+		/// exactly that many rows rather than the whole file.
+		/// </summary>
+		[TestMethod]
+		public void TestRespectsRowWindow()
+		{
+			FileReader rawData = new FileReader(FixtureRoot("SampleInput_Specimen1"),
+			                                    inaxChan: 1, intranChan: 0,
+			                                    inlength: 1.0, inxSecArea: 1.0,
+			                                    inrowStart: 3, inrowEnd: 7,
+			                                    inStrainCol: 1, inStressCol: 2, indispflag: 0);
+
+			// Rows 3 through 7 inclusive
+			Assert.AreEqual(5, rawData.RawData.GetLength(0));
+		}
+
+		/// <summary>
+		/// Regression test for the quote/backslash handling in FileReader's split: the raw
+		/// equipment output wraps values in double quotes, which must not reach Convert.ToDouble.
+		/// Specimen_RawData_1.csv is a real capture from the testing machine.
+		/// </summary>
+		[TestMethod]
+		public void TestParsesQuotedEquipmentOutput()
+		{
+			// Time / Extension / Load, with a units row -- data starts at line 7.
+			// Load (column 3) is the force channel, Extension (column 2) the displacement.
+			FileReader rawData = new FileReader(FixtureRoot("Specimen_RawData_1"),
+			                                    inaxChan: 1, intranChan: 0,
+			                                    inlength: 1.0, inxSecArea: 1.0,
+			                                    inrowStart: 7, inrowEnd: 10000,
+			                                    inStrainCol: 2, inStressCol: 3, indispflag: 1);
+
+			Assert.IsTrue(rawData.RawData.GetLength(0) > 0, "expected at least one data row");
+			Assert.AreEqual(2, rawData.RawData.GetLength(1));
 		}
 	}
 }

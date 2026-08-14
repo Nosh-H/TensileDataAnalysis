@@ -14,11 +14,9 @@ namespace TestStressStrainData
 {
 	[TestClass]
 	public class TestPolynomial{
-		private double demoDouble;
 		[TestMethod]
 		public void TestFirstOrder(){
 			Polynomial myPoly = new Polynomial();
-			demoDouble = 4.5;
 			int myinPolynomialOrder = 1;
 			double [] SEi= new double[myinPolynomialOrder+1];
 			double Rsquared=0;
@@ -29,21 +27,15 @@ namespace TestStressStrainData
 			double acceptablePrecision = 1.0E-8;
 					
 			myPoly.PolynomialFit(myinPolynomialOrder,myX,myY, out Cout,out SEi,out Rsquared,out residualSumSquared);
-    		
-    		Console.WriteLine("Inside TestFirstOrder, double = " + Cout);
-    		Console.ReadLine();
-    		
+
     		Assert.AreEqual(5.903846154,Cout[0,0],acceptablePrecision);
     		Assert.AreEqual(.03021978,Cout[1,0],acceptablePrecision);
 			Assert.AreEqual(0.20350416,SEi[1],acceptablePrecision);
 			Assert.AreEqual(.00200066138,Rsquared,acceptablePrecision);
-
-			Console.WriteLine("Inside TestFirstOrder, double = " + demoDouble);
 		}
 		[TestMethod]
 		public void TestSixthOrder(){
 			Polynomial myPoly = new Polynomial();
-			demoDouble = 4.5;
 			int myinPolynomialOrder = 6;
 			double [] SEi= new double[myinPolynomialOrder+1];
 			double Rsquared=0;
@@ -54,15 +46,11 @@ namespace TestStressStrainData
 			double acceptablePrecision = 1.0E-7;
 					
 			myPoly.PolynomialFit(myinPolynomialOrder,myX,myY, out Cout,out SEi,out Rsquared,out residualSumSquared);
-    		
-    		Console.WriteLine("Inside TestFirstOrder, double = " + Cout);
-    		Console.ReadLine();
-    		
+
     		Assert.AreEqual(-4.437062937,Cout[0,0],acceptablePrecision);
     		Assert.AreEqual(7.306886921,Cout[1,0],acceptablePrecision);
 			Assert.AreEqual(.996792617,Rsquared,acceptablePrecision);
 			Assert.AreEqual(0.00227394457177355,SEi[5],acceptablePrecision);
-			Console.WriteLine("Inside TestSixthOrder");
 		}
 		
 		[TestMethod]

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <RootNamespace>TestStressStrainData</RootNamespace>
     <AssemblyName>TestStressStrainData</AssemblyName>
@@ -11,5 +11,15 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.*" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.10" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.10" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DataAnalyzer\DataAnalyzer.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Sample CSVs the FileReader tests parse. Copied next to the test assembly so the
+         tests resolve them relative to their own location rather than an absolute path. -->
+    <None Include="..\DataAnalyzer\TestFiles\*.csv" Link="TestFiles\%(Filename)%(Extension)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
