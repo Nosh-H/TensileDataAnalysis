@@ -29,7 +29,6 @@ namespace DataAnalyzer
 		private int dispflag = 0;
 		private int numberofFiles = 0;
 		private int numberofTranFiles = 0;
-		private int stringIndex1, stringIndex2;//, i, j;
 		private List<string[]> individualInputsList= new List<string[]>();
 		private string[] groupInputsList;
 		private Analyze analyze;
@@ -57,44 +56,88 @@ namespace DataAnalyzer
 		}
 		//individual file inputs Group
 		void BrowseMouseClick(object sender, MouseEventArgs e){
+			if (!TryPickSpecimenFile())
+			{
+				return;
+			}
+
+			inputGroupBox.Visible = true;
+			inputGroupBox.Enabled = true;
+			previewBttn.Enabled = true;
+			if (numberofFiles >= 1)
+				doneBttn.Enabled = true;
+			addBttn.Enabled = false;
+		}
+
+		/// <summary>
+		/// Opens a file picker for a specimen CSV, resolves the output folder and the "root" path
+		/// (full path with the .csv extension stripped, since FileReader appends it back) using
+		/// System.IO.Path rather than searching the path text for a literal "v" or ".", and
+		/// auto-populates the row-start/row-end fields from the file's actual data extent.
+		/// Shared by BrowseMouseClick (first specimen) and AddBttnClick (every specimen after),
+		/// so both behave identically instead of silently diverging.
+		/// </summary>
+		/// <returns>true if a file was picked and parsed successfully; false on Cancel or error
+		/// (an error is already shown to the user in the false case)</returns>
+		private bool TryPickSpecimenFile()
+		{
 			openFileTxt.Text = "";
 			OpenFileDialog fdlg = new OpenFileDialog();
-            fdlg.Title = "Select File To Read From";
-            fdlg.Filter = "CSV Files (*.csv*)|*.csv*";
-            fdlg.FilterIndex = 2;
-            fdlg.RestoreDirectory = true;
-            if (fdlg.ShowDialog() == DialogResult.OK)
-            {
-                
-            }
-            try{
-            	openFileTxt.Text = fdlg.FileName;
-                //This next set of messy code isolates the folder of the LAST file opened, so that the group
-                //files can be saved there
-                string splitline = "\\";
-                stringIndex1 = openFileTxt.Text.LastIndexOf(splitline);
-            	stringIndex2 = openFileTxt.Text.LastIndexOf("v");
-            	folder = openFileTxt.Text.Remove(stringIndex1+1,stringIndex2-stringIndex1);
-            	stringIndex1 = openFileTxt.Text.IndexOf(".");
-            	stringIndex2 = openFileTxt.Text.LastIndexOf("v");
-            	openFileTxt.Text = openFileTxt.Text.Remove(stringIndex1,stringIndex2-stringIndex1+1);
-				
+			fdlg.Title = "Select File To Read From";
+			fdlg.Filter = "CSV Files (*.csv*)|*.csv*";
+			fdlg.FilterIndex = 2;
+			fdlg.RestoreDirectory = true;
+			if (fdlg.ShowDialog() != DialogResult.OK)
+			{
+				return false;
+			}
+
+			try
+			{
+				string directory = Path.GetDirectoryName(fdlg.FileName);
+				// folder keeps a trailing separator: FileWriter concatenates it directly with a
+				// file name (e.g. folder + "TotalLoessDataE.csv")
+				folder = directory + "\\";
+				// "root": the full path with the .csv extension stripped -- FileReader appends
+				// ".csv" back on when it opens the file
+				openFileTxt.Text = Path.Combine(directory, Path.GetFileNameWithoutExtension(fdlg.FileName));
+
 				FindMinAndMax(openFileTxt.Text, 0, 1, out int firstIndex, out int lastIndex);
 				rowEndTxtBox.Text = Convert.ToString(lastIndex);
-				rowStartTxtBox.Text= Convert.ToString(firstIndex);
-            	
-            }        
-            catch{
-            	MessageBox.Show("Error: Try Again!");
-            	inputGroupBox.Enabled = false;
-            	return;
-            }
-            inputGroupBox.Visible = true;
-            inputGroupBox.Enabled = true;
-            previewBttn.Enabled = true;
-            if (numberofFiles >= 1)
-            	doneBttn.Enabled = true;
-            addBttn.Enabled = false;
+				rowStartTxtBox.Text = Convert.ToString(firstIndex);
+			}
+			catch
+			{
+				MessageBox.Show("Error: Try Again!");
+				inputGroupBox.Enabled = false;
+				return false;
+			}
+
+			return true;
+		}
+
+		/// <summary>
+		/// Validates the six per-specimen fields (area, length, row range, strain/stress columns)
+		/// that PreviewBttnClick and AddCurrentBttnClick both require before proceeding. Shared so
+		/// the field list and the error message only need to be kept in sync in one place.
+		/// </summary>
+		private bool TryValidateSpecimenInputs()
+		{
+			try
+			{
+				Convert.ToDouble(xSecAreaTxtBox.Text);
+				Convert.ToDouble(lengthTxtBox.Text);
+				Convert.ToInt32(rowStartTxtBox.Text);
+				Convert.ToInt32(rowEndTxtBox.Text);
+				Convert.ToInt32(tbStrainCol.Text);
+				Convert.ToInt32(tbStressCol.Text);
+			}
+			catch
+			{
+				MessageBox.Show("Invalid User Input:  Verify Values Are Correct");
+				return false;
+			}
+			return true;
 		}
 		void TransCheckBox1CheckedChanged(object sender, EventArgs e){
 			tranChanGroupBox.Visible = true;
@@ -129,16 +172,8 @@ namespace DataAnalyzer
 		}
 		void PreviewBttnClick(object sender, EventArgs e){
 			//first, check to make sure inputs are of the proper form:
-			try{
-				Convert.ToDouble(xSecAreaTxtBox.Text);
-				Convert.ToDouble(lengthTxtBox.Text);
-				Convert.ToInt32(rowStartTxtBox.Text);
-				Convert.ToInt32(rowEndTxtBox.Text);
-				Convert.ToInt32(tbStrainCol.Text);
-				Convert.ToInt32(tbStressCol.Text);
-			}
-			catch{
-				MessageBox.Show("Invalid User Input:  Verify Values Are Correct");
+			if (!TryValidateSpecimenInputs())
+			{
 				return;
 			}
 			try{
@@ -171,19 +206,11 @@ namespace DataAnalyzer
 		void AddCurrentBttnClick(object sender, EventArgs e)
 		{
 			//first, check to make sure that the inputs are the proper format
-			try{
-				Convert.ToDouble(xSecAreaTxtBox.Text);
-				Convert.ToDouble(lengthTxtBox.Text);
-				Convert.ToInt32(rowStartTxtBox.Text);
-				Convert.ToInt32(rowEndTxtBox.Text);
-				Convert.ToInt32(tbStrainCol.Text);
-				Convert.ToInt32(tbStressCol.Text);
-			}
-			catch{
-				MessageBox.Show("Invalid User Input:  Verify Values Are Correct");
+			if (!TryValidateSpecimenInputs())
+			{
 				return;
 			}
-			
+
 			//Checks to make sure that all data is numerical, and columns are correct
 			try{
 				FileReader fr = new FileReader(openFileTxt.Text, Convert.ToInt32(axChan.Text), 
@@ -233,42 +260,25 @@ namespace DataAnalyzer
 			addBttn.Enabled = true;
 			previewBttn.Enabled = false;
 		}
-		void AddBttnClick(object sender, EventArgs e){	
-			//reset the Browse and openFile text box
-			openFileTxt.Text = "";
+		void AddBttnClick(object sender, EventArgs e){
+			//re-enable the Browse controls that AddCurrentBttnClick disabled, so a new file can be picked
 			inputGroupBox.Enabled = false;
 			addCurrentBttn.Enabled = true;
 			Browse.Enabled = true;
 			label2.Enabled = true;
 			openFileTxt.Enabled = true;
-			
-			openFileTxt.Text = "";
-			OpenFileDialog fdlg = new OpenFileDialog();
-            fdlg.Title = "Select File To Read From";
-            fdlg.Filter = "CSV Files (*.csv*)|*.csv*";
-            fdlg.FilterIndex = 2;
-            fdlg.RestoreDirectory = true;
-            if (fdlg.ShowDialog() == DialogResult.OK)
-            {
-                openFileTxt.Text = fdlg.FileName;
-                
-            }
-            try{
-            	stringIndex1 = openFileTxt.Text.IndexOf(".");
-            	stringIndex2 = openFileTxt.Text.LastIndexOf("v");
-            	openFileTxt.Text = openFileTxt.Text.Remove(stringIndex1,stringIndex2-stringIndex1+1);
-            }
-            catch{
-            	MessageBox.Show("Error in file name format");
-            	inputGroupBox.Enabled = false;
-            	return;
-            }
-            inputGroupBox.Visible = true;
-            inputGroupBox.Enabled = true;
-            previewBttn.Enabled = true;
-            if (numberofFiles >= 1)
-            	doneBttn.Enabled = true;
-            addBttn.Enabled = false;
+
+			if (!TryPickSpecimenFile())
+			{
+				return;
+			}
+
+			inputGroupBox.Visible = true;
+			inputGroupBox.Enabled = true;
+			previewBttn.Enabled = true;
+			if (numberofFiles >= 1)
+				doneBttn.Enabled = true;
+			addBttn.Enabled = false;
 		}
 		
 		void DoneBttnClick(object sender, EventArgs e){
@@ -399,7 +409,8 @@ namespace DataAnalyzer
 				return;
 			}
 			catch(Exception ex){
-				MessageBox.Show("Something's not right: check your data/inputs and give it another try!" + ex.Message + ex.StackTrace);
+				ErrorDialog.Show("Something's not right: check your data/inputs and give it another try!",
+				                 ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace);
 				plotGroupBox.Visible = false;
 				dataFilesGroupBox.Visible = false;
 				return;
@@ -448,57 +459,60 @@ namespace DataAnalyzer
 		//However, it isn't really meaty, and is based on the plotting buttons above.
 		void PlotBttnClick(object sender, EventArgs e)
 		{
-			fileNumber = Convert.ToInt16(fileNumberBox.Text);
+			fileNumber = (int)fileNumberBox.Value;
 			PlotMaker pm = new PlotMaker(analyze,numberofFiles, temperature, material, fileNumber);
+			// Exactly one of the three radio groups (stress-strain axis, all/single/combined
+			// specimen selection, raw/combined/slope view) can be checked at a time, so these
+			// twelve conditions are mutually exclusive -- chained with else-if so at most one is
+			// evaluated to completion instead of testing all twelve on every click.
 			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == true)
 			    && (rawRadioBttn.Checked == true)){
 			    	pm.PlotMaker1();
 			}
-			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
+			else if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
 			    && (rawRadioBttn.Checked == true)){
 			    	pm.PlotMaker2();
-			}    
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
 			    && (rawRadioBttn.Checked == true)){
 			    	pm.PlotMaker3();
-			}  
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
 			    && (rawRadioBttn.Checked == true)){
 			    	pm.PlotMaker4();
-			} 
-			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == true)
+			}
+			else if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == true)
 			    && (combinedRadioBttn.Checked == true)){
 			    	pm.PlotMaker5();
 			}
-			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
+			else if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
 			    && (combinedRadioBttn.Checked == true)){
 			    	pm.PlotMaker6();
-			}    
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
 			    && (combinedRadioBttn.Checked == true)){
 			    	pm.PlotMaker7();
-			}  
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
 			    && (combinedRadioBttn.Checked == true)){
 			    	pm.PlotMaker8();
-			} 
-			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == true)
+			}
+			else if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == true)
 			    && (SlopeRadioBttn.Checked == true)){
 			    	pm.PlotMaker9();
 			}
-			if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
+			else if ((stressStrainRadioBttn.Checked == true) && (allRadioBttn.Checked == false)
 			    && (SlopeRadioBttn.Checked == true)){
 			    	pm.PlotMaker10();
-			}    
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == true)
 			    && (SlopeRadioBttn.Checked == true)){
 			    	pm.PlotMaker11();
-			}  
-			if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
+			}
+			else if ((stressStrainRadioBttn.Checked == false) && (allRadioBttn.Checked == false)
 			    && (SlopeRadioBttn.Checked == true)){
 			    	pm.PlotMaker12();
-			} 
-		
+			}
 		}
 
 
@@ -534,7 +548,7 @@ namespace DataAnalyzer
 		}	
 		void YieldStressBttnClick(object sender, EventArgs e)
 		{
-			fileNumber = Convert.ToInt16(fileNumberBox.Text);
+			fileNumber = (int)fileNumberBox.Value;
 			PlotMaker pm = new PlotMaker(analyze,numberofFiles, temperature, material, fileNumber);
 			pm.PlotMaker15();
 		}
@@ -549,7 +563,7 @@ namespace DataAnalyzer
         {
             //Plot the pooled zeroed data extended out to the common strain, plus the LOESS mean
             //points and global fit through it.  Stress/strain, and transverse/axial if it exists.
-            fileNumber = Convert.ToInt16(fileNumberBox.Text);
+            fileNumber = (int)fileNumberBox.Value;
             PlotMaker pm = new PlotMaker(analyze, numberofFiles, temperature, material, fileNumber);
             pm.PlotMaker17();
             if (numberofTranFiles != 0){
@@ -560,7 +574,7 @@ namespace DataAnalyzer
         private void bZeroeingPlot_Click(object sender, EventArgs e)
         {
             //Plot raw data, zeroed data, data used for linear fit, and linear fit
-            fileNumber = Convert.ToInt16(fileNumberBox.Text);
+            fileNumber = (int)fileNumberBox.Value;
             PlotMaker pm = new PlotMaker(analyze, numberofFiles, temperature, material, fileNumber);
             pm.PlotMaker16();
         }
@@ -577,16 +591,16 @@ namespace DataAnalyzer
                 string line = lines[i];
                 string[] values = line.Split(new char[] { ',', '/', '"' }, StringSplitOptions.RemoveEmptyEntries);
 
-				if (indexOfStrain < values.Length && double.TryParse(values[indexOfStrain], out _))
-				{
-					if (indexOfStress < values.Length && double.TryParse(values[indexOfStress], out _))
-					{ 
-					if (firstIndex == -1)
-					{
-						firstIndex = i + 1;
-					}
-					lastIndex = i + 1;
-				}
+                if (indexOfStrain < values.Length && double.TryParse(values[indexOfStrain], out _))
+                {
+                    if (indexOfStress < values.Length && double.TryParse(values[indexOfStress], out _))
+                    {
+                        if (firstIndex == -1)
+                        {
+                            firstIndex = i + 1;
+                        }
+                        lastIndex = i + 1;
+                    }
                 }
             }
         }
