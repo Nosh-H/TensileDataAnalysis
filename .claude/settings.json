@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(dotnet test \"c:\\\\Users\\\\nhhas\\\\Documents\\\\Stapleton Research Group\\\\Clone\\\\TensileDataAnalysis\\\\TensileDataAnalyzer.sln\" --nologo 2>&1)"
+    ]
+  }
+}
