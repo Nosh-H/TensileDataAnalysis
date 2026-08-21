@@ -23,11 +23,17 @@ namespace DataAnalyzer.Plots
 		string root;
 		int axChan, tranChan, dispflag, stressCol, strainCol;
         public int rowStart, rowEnd;
-       
 
         double length, xSecArea;
-		
-		public PreSreening(string inroot, int inaxChan, int intranChan,	 
+
+        // The full [absoluteMinIndex, absoluteMaxIndex] data range is read from disk exactly
+        // once, in the constructor.  Every scroll tick used to construct a brand new FileReader
+        // -- re-reading and re-parsing the whole CSV -- on every single tick while the user
+        // dragged a trackbar.  Now CreateChart just re-slices this already-parsed array.
+        private readonly int absoluteMinIndex;
+        private readonly FileReader fullData;
+
+		public PreSreening(string inroot, int inaxChan, int intranChan,
 		                  double inlength, double inxSecArea, int inrowStart, int inrowEnd, int minIndex, int maxIndex, int inStrainCol, int inStressCol, int indispflag)
 		{
 			root = inroot;
@@ -40,12 +46,13 @@ namespace DataAnalyzer.Plots
 			rowEnd = inrowEnd;
 			stressCol = inStressCol;
 			strainCol = inStrainCol;
-			
+			absoluteMinIndex = minIndex;
+
 			InitializeComponent();
 			Activate();
 			Show();
 
-            //Theseonly need to be set once
+            //These only need to be set once
             tbStartIndex.Minimum = minIndex;
             tbStartIndex.Maximum = rowEnd - 1;
             tbStartIndex.Value = rowStart;
@@ -56,21 +63,27 @@ namespace DataAnalyzer.Plots
             tbEndIndex.Minimum = rowStart + 1;
             lMaxEnd.Text = Convert.ToString(maxIndex);
 
-            setTickBoxes();
+			setTickBoxes();
 
+			fullData = new FileReader(root, axChan, tranChan, length, xSecArea, minIndex, maxIndex, strainCol, stressCol, dispflag);
+
+			// Ensure CreateChart runs after fullData is initialized
+			this.Shown += new EventHandler(PreSreening_Shown);
 		}
-		
+
 		void Zg2Load(object sender, EventArgs e)
 		{
-			CreateChart( zg2 );
+			// Avoid calling CreateChart before fullData is initialized.
+			if (fullData != null) CreateChart( zg2 );
 		}
-		
+
+		private void PreSreening_Shown(object sender, EventArgs e)
+		{
+			CreateChart(zg2);
+		}
+
 		// Call this method from the Form_Load method, passing your ZedGraphControl
 		public void CreateChart( ZedGraphControl zgc ){
-			
-			//Read in the Data first
-			FileReader tempread = new FileReader(root, axChan, tranChan, length, xSecArea, rowStart, rowEnd, strainCol, stressCol, dispflag);
-			
 
 			GraphPane myPane = zgc.GraphPane;
             myPane.CurveList = new CurveList();
@@ -82,20 +95,26 @@ namespace DataAnalyzer.Plots
 
    			PointPairList list1 = new PointPairList();
    			PointPairList list2 = new PointPairList();
-   			
-   			for (int i =0; i < tempread.RawData.GetUpperBound(0)+1; i++){ 
-   				for (int j = 0; j < tempread.AxChan; j++){
-   					list1.Add(tempread.RawData[i,1+j], tempread.RawData[i,0]);
+
+   			// Slice the already-loaded [absoluteMinIndex, absoluteMaxIndex] data down to the
+   			// currently selected [rowStart, rowEnd] window, instead of re-reading from disk.
+   			// fullData.RawData row i corresponds to file row (absoluteMinIndex + i).
+   			int firstRow = rowStart - absoluteMinIndex;
+   			int lastRow = System.Math.Min(rowEnd - absoluteMinIndex, fullData.RawData.GetUpperBound(0));
+
+   			for (int i = firstRow; i <= lastRow; i++){
+   				for (int j = 0; j < fullData.AxChan; j++){
+   					list1.Add(fullData.RawData[i,1+j], fullData.RawData[i,0]);
    				}
    			}
-   			if (tempread.TranChan != 0){
-   				for (int i = 0; i < tempread.RawData.GetUpperBound(0)+1; i++){
-   					for (int j = 0; j < tempread.TranChan; j++){
-   						list2.Add(tempread.RawData[i,1+tempread.AxChan+j], tempread.RawData[i,0]);
+   			if (fullData.TranChan != 0){
+   				for (int i = firstRow; i <= lastRow; i++){
+   					for (int j = 0; j < fullData.TranChan; j++){
+   						list2.Add(fullData.RawData[i,1+fullData.AxChan+j], fullData.RawData[i,0]);
    					}
    				}
    			}
-   			else 
+   			else
    				list2.Add(0,0);
    			
    			LineItem myCurve1 = myPane.AddCurve( "Axial Strain", list1, Color.Blue, SymbolType.Diamond );

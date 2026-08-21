@@ -37,7 +37,20 @@ namespace DataAnalyzer
 		private string material;
 		private string folder;
 		private string temperature;
-				
+
+		// Controls added in code (BuildAdditionalControls) rather than via the Designer -- see
+		// that method for why.
+		private TextBox outputFolderTxtBox;
+		private Button changeOutputFolderBttn;
+		private bool folderManuallySet = false;
+		private ListBox specimenListBox;
+		private Button editSpecimenBttn;
+		private Button removeSpecimenBttn;
+		private StatusStrip statusStrip1;
+		private ToolStripStatusLabel statusLabel;
+		private System.Windows.Forms.Timer statusClearTimer;
+		private ToolTip inputToolTip;
+
 		[STAThread]
 		public static void Main(string[] args){
 			Application.EnableVisualStyles();
@@ -53,6 +66,219 @@ namespace DataAnalyzer
 			//
 			// start out with an open dialog box.
 			//
+			BuildAdditionalControls();
+		}
+
+		/// <summary>
+		/// Adds the output-folder picker, staged-specimen list, and status bar, and registers
+		/// tooltips on the group input fields.  Built entirely in code -- rather than via
+		/// MainForm.Designer.cs -- since these were added without access to the Visual Studio
+		/// designer surface.  They render correctly at runtime but won't appear on the
+		/// designer's WYSIWYG canvas until someone re-lays them out there by hand.
+		/// </summary>
+		private void BuildAdditionalControls()
+		{
+			const int left = 12;
+			const int width = 667;
+
+			// Output-folder picker: makes explicit where files will be written, and lets the
+			// user override the folder silently derived from the last specimen file's location.
+			GroupBox outputFolderGroupBox = new GroupBox
+			{
+				Text = "Output Folder",
+				Location = new Point(left, 615),
+				Size = new Size(width, 55),
+			};
+			outputFolderTxtBox = new TextBox
+			{
+				ReadOnly = true,
+				Location = new Point(10, 20),
+				Size = new Size(550, 20),
+			};
+			changeOutputFolderBttn = new Button
+			{
+				Text = "Change...",
+				Location = new Point(568, 19),
+				Size = new Size(85, 23),
+			};
+			changeOutputFolderBttn.Click += ChangeOutputFolderBttnClick;
+			outputFolderGroupBox.Controls.Add(outputFolderTxtBox);
+			outputFolderGroupBox.Controls.Add(changeOutputFolderBttn);
+
+			// Staged-specimen list: click a specimen to edit or remove it, instead of one typo
+			// meaning the whole specimen list has to be re-entered from scratch.
+			GroupBox specimenListGroupBox = new GroupBox
+			{
+				Text = "Staged Specimens (double-click to edit)",
+				Location = new Point(left, 678),
+				Size = new Size(width, 150),
+			};
+			specimenListBox = new ListBox
+			{
+				Location = new Point(10, 20),
+				Size = new Size(550, 120),
+			};
+			specimenListBox.SelectedIndexChanged += SpecimenListBoxSelectedIndexChanged;
+			specimenListBox.DoubleClick += EditSpecimenBttnClick;
+			editSpecimenBttn = new Button
+			{
+				Text = "Edit",
+				Location = new Point(568, 20),
+				Size = new Size(85, 23),
+				Enabled = false,
+			};
+			editSpecimenBttn.Click += EditSpecimenBttnClick;
+			removeSpecimenBttn = new Button
+			{
+				Text = "Remove",
+				Location = new Point(568, 50),
+				Size = new Size(85, 23),
+				Enabled = false,
+			};
+			removeSpecimenBttn.Click += RemoveSpecimenBttnClick;
+			specimenListGroupBox.Controls.Add(specimenListBox);
+			specimenListGroupBox.Controls.Add(editSpecimenBttn);
+			specimenListGroupBox.Controls.Add(removeSpecimenBttn);
+
+			// Non-modal status bar: replaces the blocking "Done Analyzing"/"File(s) Written"
+			// message boxes with a message that clears itself after a few seconds.
+			statusLabel = new ToolStripStatusLabel { Text = "" };
+			statusStrip1 = new StatusStrip();
+			statusStrip1.Items.Add(statusLabel);
+
+			Controls.Add(outputFolderGroupBox);
+			Controls.Add(specimenListGroupBox);
+			Controls.Add(statusStrip1); // added last so Dock=Bottom docks it at the true bottom edge
+
+			ClientSize = new Size(ClientSize.Width, 864);
+
+			// Tooltips on the group-input fields that have no inline explanation of what they
+			// mean or what a reasonable value looks like.
+			inputToolTip = new ToolTip();
+			inputToolTip.SetToolTip(intervalTxtBox,
+				"LOESS window width (span) along the strain axis used for local curve fitting.\n" +
+				"Smaller = more local detail; larger = smoother.");
+			inputToolTip.SetToolTip(rMinTxtBx,
+				"Minimum R² (0 to 1) required to keep extending the linear region used to find\n" +
+				"the strain offset. Only used when \"Yield Stress\" is checked.");
+			inputToolTip.SetToolTip(tbMinPts,
+				"Minimum number of points always included when searching for the linear region,\n" +
+				"before the R² minimum above starts being enforced.");
+			inputToolTip.SetToolTip(tbExtrapPoints,
+				"Number of trailing points, per specimen, used to fit the line each curve is\n" +
+				"extrapolated forward with.");
+			inputToolTip.SetToolTip(tbExtrapXCommon,
+				"The strain value every specimen's curve is extended out to during extrapolation.");
+		}
+
+		/// <summary>
+		/// Shows a message in the status bar for a few seconds, then clears it - a non-modal
+		/// replacement for confirmations that don't need the user to click anything to continue.
+		/// </summary>
+		private void ShowStatus(string message)
+		{
+			statusLabel.Text = message;
+			if (statusClearTimer == null)
+			{
+				statusClearTimer = new System.Windows.Forms.Timer { Interval = 4000 };
+				statusClearTimer.Tick += (s, e) =>
+				{
+					statusLabel.Text = "";
+					statusClearTimer.Stop();
+				};
+			}
+			statusClearTimer.Stop();
+			statusClearTimer.Start();
+		}
+
+		private void ChangeOutputFolderBttnClick(object sender, EventArgs e)
+		{
+			using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+			{
+				fbd.Description = "Select the folder output files should be written to";
+				if (!string.IsNullOrEmpty(folder) && Directory.Exists(folder))
+				{
+					fbd.SelectedPath = folder;
+				}
+				if (fbd.ShowDialog() == DialogResult.OK)
+				{
+					folder = fbd.SelectedPath + "\\";
+					folderManuallySet = true;
+					outputFolderTxtBox.Text = folder;
+				}
+			}
+		}
+
+		private void SpecimenListBoxSelectedIndexChanged(object sender, EventArgs e)
+		{
+			bool hasSelection = specimenListBox.SelectedIndex >= 0;
+			removeSpecimenBttn.Enabled = hasSelection;
+			editSpecimenBttn.Enabled = hasSelection;
+		}
+
+		private void RemoveSpecimenBttnClick(object sender, EventArgs e)
+		{
+			int index = specimenListBox.SelectedIndex;
+			if (index < 0)
+			{
+				return;
+			}
+			RemoveStagedSpecimen(index);
+		}
+
+		private void EditSpecimenBttnClick(object sender, EventArgs e)
+		{
+			int index = specimenListBox.SelectedIndex;
+			if (index < 0)
+			{
+				return;
+			}
+
+			string[] indiv = individualInputsList[index];
+			openFileTxt.Text = indiv[0];
+			axChan.Text = indiv[1];
+			tranChan.Text = indiv[2];
+			lengthTxtBox.Text = indiv[3];
+			xSecAreaTxtBox.Text = indiv[4];
+			rowStartTxtBox.Text = indiv[5];
+			rowEndTxtBox.Text = indiv[6];
+			tbStrainCol.Text = indiv[7];
+			tbStressCol.Text = indiv[8];
+			dispflag = Convert.ToInt32(indiv[9]);
+
+			RemoveStagedSpecimen(index);
+
+			// Re-open the specimen entry controls so the edited values can be reviewed and
+			// re-added via "Add Current", mirroring the state AddBttnClick puts a new specimen in.
+			inputGroupBox.Visible = true;
+			inputGroupBox.Enabled = true;
+			addCurrentBttn.Enabled = true;
+			Browse.Enabled = true;
+			label2.Enabled = true;
+			openFileTxt.Enabled = true;
+			previewBttn.Enabled = true;
+		}
+
+		/// <summary>
+		/// Removes a staged specimen from both individualInputsList and specimenListBox (which
+		/// are kept index-aligned) and updates the file counters to match.
+		/// </summary>
+		private void RemoveStagedSpecimen(int index)
+		{
+			bool hadTransverse = individualInputsList[index][2] != "0";
+			individualInputsList.RemoveAt(index);
+			specimenListBox.Items.RemoveAt(index);
+
+			numberofFiles--;
+			if (hadTransverse)
+			{
+				numberofTranFiles--;
+			}
+			label10.Text = numberofFiles + " file(s) scanned";
+			if (numberofFiles < 1)
+			{
+				doneBttn.Enabled = false;
+			}
 		}
 		//individual file inputs Group
 		void BrowseMouseClick(object sender, MouseEventArgs e){
@@ -95,10 +321,16 @@ namespace DataAnalyzer
 			try
 			{
 				string directory = Path.GetDirectoryName(fdlg.FileName);
-				// folder keeps a trailing separator: FileWriter concatenates it directly with a
-				// file name (e.g. folder + "TotalLoessDataE.csv")
-				folder = directory + "\\";
-				// "root": the full path with the .csv extension stripped -- FileReader appends
+				// Don't overwrite a folder the user explicitly chose via "Change..." in the
+				// Output Folder picker.
+				if (!folderManuallySet)
+				{
+					// folder keeps a trailing separator: FileWriter concatenates it directly
+					// with a file name (e.g. folder + "TotalLoessDataE.csv")
+					folder = directory + "\\";
+					outputFolderTxtBox.Text = folder;
+				}
+				// "root": the full path with the .csv extension stripped - FileReader appends
 				// ".csv" back on when it opens the file
 				openFileTxt.Text = Path.Combine(directory, Path.GetFileNameWithoutExtension(fdlg.FileName));
 
@@ -247,7 +479,12 @@ namespace DataAnalyzer
 			indiv[8] = (tbStressCol.Text);
 			indiv[9] = (dispflag.ToString());
 			individualInputsList.Add(indiv);
-			
+			// No leading index number: a removal would leave it stale (a gap in the numbering)
+			// since specimenListBox.Items only ever gets appended to or removed from in step
+			// with individualInputsList, never renumbered.
+			specimenListBox.Items.Add(Path.GetFileName(indiv[0])
+			                           + "  (axChan=" + indiv[1] + ", tranChan=" + indiv[2] + ")");
+
 			numberofFiles++;
 			if ((Convert.ToInt16(tranChan.Text)) != 0)
 				numberofTranFiles++;
@@ -356,6 +593,12 @@ namespace DataAnalyzer
 				offsetArray[1] =(Convert.ToDouble(offsetPercentTxtBx.Text));
 			}
 			
+			// The pipeline (FileReader -> Averager -> Zeroer per specimen, then Combination) runs
+			// synchronously and can take a noticeable moment on large files, with no other
+			// feedback that anything is happening -- so show a wait cursor for its duration.
+			// The try/finally guarantees the cursor resets no matter which catch below returns.
+			Cursor = Cursors.WaitCursor;
+			try{
 			try{
 				analyze = new Analyze(individualInputsList, groupInputsList, offsetArray);
 			}
@@ -415,8 +658,11 @@ namespace DataAnalyzer
 				dataFilesGroupBox.Visible = false;
 				return;
 			}
-			
-			
+			}
+			finally{
+				Cursor = Cursors.Default;
+			}
+
 			if (numberofTranFiles == 0){
 				tranAxRadioBttn.Enabled = false;
 				taLoessCheckBox.Enabled = false;
@@ -430,7 +676,7 @@ namespace DataAnalyzer
 			plotGroupBox.Visible = true;
 			dataFilesGroupBox.Visible = true;
 
-			MessageBox.Show("Done Analyzing");
+			ShowStatus("Done Analyzing");
 		}
 		//Plotting Options group
 		void StressStrainRadioBttnCheckedChanged(object sender, EventArgs e)
@@ -519,28 +765,38 @@ namespace DataAnalyzer
         //Data Files group
         void FileWriteBttnClick(object sender, EventArgs e)
 		{ //writes a file for each checked box
-			FileWriter fw = new FileWriter(analyze,numberofFiles, temperature, material, folder);
-			if (ssdhCheckBox.Checked == true){
-				fw.FileWriter1();
+			// Unlike AnalyzeBttnClick, this had no exception handling at all: a failed write
+			// (bad path, permissions, a file locked by a previous failed attempt) would abort
+			// silently mid-loop, skip every remaining checkbox, and never reach ShowStatus below
+			// -- which looks exactly like "the button does nothing" with no indication why.
+			try
+			{
+				FileWriter fw = new FileWriter(analyze,numberofFiles, temperature, material, folder);
+				if (ssdhCheckBox.Checked == true){
+					fw.FileWriter1();
+				}
+				if (ssLoessCheckBox.Checked == true){
+					fw.FileWriter2();
+				}
+				if (tadhCheckBox.Checked == true){
+					fw.FileWriter3();
+				}
+				if (taLoessCheckBox.Checked == true){
+					fw.FileWriter4();
+				}
+				if (ssTotalCheckBox.Checked == true){
+					fw.FileWriter5();
+				}
+				if (taTotalCheckBox.Checked == true){
+					fw.FileWriter6();
+				}
+				ShowStatus("File(s) Written");
 			}
-			if (ssLoessCheckBox.Checked == true){
-				fw.FileWriter2();
+			catch(Exception ex)
+			{
+				ErrorDialog.Show("Couldn't write one or more files: check the output folder exists and is writable.",
+				                 ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace);
 			}
-			if (tadhCheckBox.Checked == true){
-				fw.FileWriter3();
-			}
-			if (taLoessCheckBox.Checked == true){
-				fw.FileWriter4();
-			}
-			if (ssTotalCheckBox.Checked == true){
-				fw.FileWriter5();
-			}
-			if (taTotalCheckBox.Checked == true){
-				fw.FileWriter6();
-			}
-			MessageBox.Show("File(s) Written");
-			
-			
 		}
 		void ResultsBttnClick(object sender, EventArgs e)
 		{
