@@ -790,12 +790,22 @@ namespace DataAnalyzer
 				if (taTotalCheckBox.Checked == true){
 					fw.FileWriter6();
 				}
-				ShowStatus("File(s) Written");
+				MessageBox.Show("Successfully saved.");
 			}
 			catch(Exception ex)
 			{
-				ErrorDialog.Show("Couldn't write one or more files: check the output folder exists and is writable.",
-				                 ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace);
+				// Fall back to a plain MessageBox if ErrorDialog itself can't be shown for some
+				// reason, so a write failure is never completely silent.
+				try
+				{
+					ErrorDialog.Show("Couldn't write one or more files: check the output folder exists and is writable.",
+					                 ex.Message + Environment.NewLine + Environment.NewLine + ex.StackTrace);
+				}
+				catch
+				{
+					MessageBox.Show("Couldn't write one or more files: check the output folder exists and is writable."
+					                 + Environment.NewLine + Environment.NewLine + ex.Message + Environment.NewLine + ex.StackTrace);
+				}
 			}
 		}
 		void ResultsBttnClick(object sender, EventArgs e)

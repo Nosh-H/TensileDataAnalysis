@@ -28,7 +28,9 @@ namespace DataAnalyzer
 			MaximizeBox = false;
 			ShowIcon = false;
 			ShowInTaskbar = false;
-			StartPosition = FormStartPosition.CenterParent;
+			// CenterParent with no owner passed to ShowDialog() is undefined/inconsistent in
+			// WinForms; CenterScreen guarantees this always renders somewhere visible.
+			StartPosition = FormStartPosition.CenterScreen;
 			ClientSize = new Size(520, 380);
 
 			Label guidanceLabel = new Label

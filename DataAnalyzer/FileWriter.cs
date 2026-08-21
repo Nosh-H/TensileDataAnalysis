@@ -31,13 +31,27 @@ namespace DataAnalyzer
 			temperature = Temperature;
 			folder = Folder;
 		}
-			
+
+		/// <summary>
+		/// Per-specimen output path: the chosen output folder plus that specimen's own file
+		/// name (not necessarily its original directory) plus a suffix, e.g. "DataHandlingE.csv".  All six
+		/// writers use the same output folder this way, rather than the four per-specimen ones
+		/// silently writing back next to each specimen's original CSV regardless of what output
+		/// folder the user picked.
+		/// </summary>
+		private string SpecimenOutputPath(int specimenIndex, string suffix)
+		{
+			string specimenName = Path.GetFileName(analyze.RawData[specimenIndex].Root);
+			return folder + specimenName + suffix;
+		}
+
+
 		public void FileWriter1(){
 			/*FileWriter 1:  one file for each specimen, writes the raw data, averaged Data, Zeroed and Cut Data
 			 * for the stress/strain data*/
 			
 			for (i = 0; i < numberofFiles; i++){
-				using (dataWrite = new StreamWriter(analyze.RawData[i].Root + "DataHandlingE.csv"))
+				using (dataWrite = new StreamWriter(SpecimenOutputPath(i, "DataHandlingE.csv")))
 				{
 					dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 					                   + temperature + "\n (ms = microstrain)");
@@ -88,7 +102,7 @@ namespace DataAnalyzer
 		 * files and fit a curve to them*/
 			
 			for (i = 0; i < numberofFiles; i++){
-				using (dataWrite = new StreamWriter(analyze.RawData[i].Root + "LoessDataE.csv"))
+				using (dataWrite = new StreamWriter(SpecimenOutputPath(i, "LoessDataE.csv")))
 				{
 					dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 					                   + temperature + "\n (ms = microstrain)");
@@ -127,7 +141,7 @@ namespace DataAnalyzer
 				//ZeroNUData is packed densely, so go through the map rather than indexing it with i
 				int nuIndex = analyze.TranIndexForFile(i);
 				if (nuIndex >= 0){
-					using (dataWrite = new StreamWriter(analyze.RawData[i].Root + "DataHandlingNU.csv"))
+					using (dataWrite = new StreamWriter(SpecimenOutputPath(i, "DataHandlingNU.csv")))
 					{
 						dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 					                   + temperature + "\n (ms = microstrain)");
@@ -191,7 +205,7 @@ namespace DataAnalyzer
 				if (nuIndex < 0){
 					continue;
 				}
-				using (dataWrite = new StreamWriter(analyze.RawData[i].Root + "LoessDataNU.csv"))
+				using (dataWrite = new StreamWriter(SpecimenOutputPath(i, "LoessDataNU.csv")))
 				{
 					dataWrite.WriteLine("Created: " + DateTime.Now + "\n Material:," + material + "\n Temperature:,"
 					                   + temperature + "\n (ms = microstrain)");
