@@ -13,7 +13,7 @@ using System;
 namespace TestStressStrainData
 {
 	    [TestClass]
-    public class testMath{
+    public class TestMatrixMath{
     	MatrixMath myMath = new MatrixMath();
     	double[,] coeffs = new double[3,3];
     	double[] multMatrix = new double[3];
@@ -23,8 +23,8 @@ namespace TestStressStrainData
     	int myn;
     	int myC;
 
-    	[TestMethod] 
-        public void testGauss(){
+    	[TestMethod]
+        public void TestGauss(){
     		myn = 3;
     		myC = 0;
     		myA[0,0] = 1.0;
@@ -40,15 +40,15 @@ namespace TestStressStrainData
     		myB[0,0] = 5.0;
     		myB[1,0] = 4.0;
     		myB[2,0] = 7.0;
-    		myMath.gauss(myA, myB, myn, myC);
+    		myMath.Gauss(myA, myB, myn, myC);
     		double acceptablePrecision = 0.000000000001;
     		Assert.AreEqual( -6.44444444444444,myB[0,0], acceptablePrecision);
     		Assert.AreEqual( -1.66666666666667,myB[1,0], acceptablePrecision);
     		Assert.AreEqual( 9.88888888888889,myB[2,0], acceptablePrecision);
     	}
 
-    	[TestMethod] 
-        public void testMatrixMultiplication(){
+    	[TestMethod]
+        public void TestMatrixMultiplication(){
     		double [,] myA = new double[2,2];
     		double [,] myB = new double[2,2];
     		double [,] myC = new double[2,2];
@@ -72,8 +72,8 @@ namespace TestStressStrainData
     		Assert.AreEqual(0.8125,myC[1,1],acceptablePrecision);
     	}
     	
-    	[TestMethod] 
-        public void testInvertMatrix(){
+    	[TestMethod]
+        public void TestInvertMatrix(){
     		double [,] myA = new double[3,3];
     		double [,] myC = new double[3,3];
 			double acceptablePrecision = 1.0E-9;

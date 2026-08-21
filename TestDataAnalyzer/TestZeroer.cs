@@ -77,8 +77,8 @@ namespace TestStressStrainData
             //
             // Hand-computed least-squares line through points (0,0)...(10,20),(11,27):
             //   slope = 57/26, intercept = -25/39, so strainOffset = -intercept/slope = 50/171.
-            const double expectedOffset = 50.0 / 171.0; // ~0.2923976608
-            Assert.AreEqual(expectedOffset, zeroer.OffsetData.StrainOffset, 1e-6);
+            const double ExpectedOffset = 50.0 / 171.0; // ~0.2923976608
+            Assert.AreEqual(ExpectedOffset, zeroer.OffsetData.StrainOffset, 1e-6);
         }
 
         [TestMethod]
@@ -109,15 +109,15 @@ namespace TestStressStrainData
             // 1.25), while stress passes through unchanged.  Row order survives the shift because
             // adding a constant doesn't change ascending order, and CutoffStrain already sorted
             // ascending by strain -- so row j corresponds directly to original index j.
-            const double tolerance = 1e-9;
+            const double Tolerance = 1e-9;
 
             // Row 0: original strain 0, stress 5
-            Assert.AreEqual(5.0, zeroer.ZeroedData[0, 0], tolerance, "stress at row 0");
-            Assert.AreEqual(1.25, zeroer.ZeroedData[0, 1], tolerance, "shifted strain at row 0");
+            Assert.AreEqual(5.0, zeroer.ZeroedData[0, 0], Tolerance, "stress at row 0");
+            Assert.AreEqual(1.25, zeroer.ZeroedData[0, 1], Tolerance, "shifted strain at row 0");
 
             // Row 6: original strain 6, stress 29 -- the last row surviving the cutoff at 6
-            Assert.AreEqual(29.0, zeroer.ZeroedData[6, 0], tolerance, "stress at row 6");
-            Assert.AreEqual(7.25, zeroer.ZeroedData[6, 1], tolerance, "shifted strain at row 6");
+            Assert.AreEqual(29.0, zeroer.ZeroedData[6, 0], Tolerance, "stress at row 6");
+            Assert.AreEqual(7.25, zeroer.ZeroedData[6, 1], Tolerance, "shifted strain at row 6");
         }
     }
 }

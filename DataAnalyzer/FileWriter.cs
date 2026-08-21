@@ -24,12 +24,12 @@ namespace DataAnalyzer
 		private int numberofFiles;
 		private string temperature, material, folder;
 		
-		public FileWriter(Analyze Analyze, int NumberofFiles, string Temperature, string Material, string Folder){
-			analyze = Analyze;
-			numberofFiles = NumberofFiles;
-			material = Material;
-			temperature = Temperature;
-			folder = Folder;
+		public FileWriter(Analyze analyze, int numberofFiles, string temperature, string material, string folder){
+			this.analyze = analyze;
+			this.numberofFiles = numberofFiles;
+			this.material = material;
+			this.temperature = temperature;
+			this.folder = folder;
 		}
 
 		/// <summary>

@@ -42,8 +42,8 @@ namespace DataAnalyzer
 			
 		}
 		public void Setup(){
-			double N1ave = 0;
-			double N2ave = 0;
+			double n1Ave = 0;
+			double n2Ave = 0;
 			string temp;
 			int i,j;
 			
@@ -78,10 +78,10 @@ namespace DataAnalyzer
 					+ "   SE: " + analyze.Total.FinalSECoefficients[i].ToString("N4") ;
 			}
 			for (j = 0; j < analyze.Total.N.Length; j++){
-					N1ave = N1ave + analyze.Total.N[j];
+					n1Ave = n1Ave + analyze.Total.N[j];
 				}
-			N1ave = N1ave/j;
-			temp = temp + "                                 Average points/interval:     " + N1ave.ToString("N0");
+			n1Ave = n1Ave/j;
+			temp = temp + "                                 Average points/interval:     " + n1Ave.ToString("N0");
 			temp = temp + "                                 R^2: " + analyze.Total.RSquared;
 			/*if (analyze.OffsetData.OffsetFlag == 1){
 				temp = temp + "                                     Offset Yield Stress: " + analyze.OffsetData.YieldStress
@@ -96,10 +96,10 @@ namespace DataAnalyzer
 					temp = temp + "  A" + i + ": " + analyze.NU.FinalCoefficients[i].ToString("N4") + "   SE: " + analyze.NU.FinalSECoefficients[i].ToString("N4") ;
 				}
 				for (j = 0; j < analyze.NU.N.Length; j++){
-					N2ave = N2ave + analyze.NU.N[j];
+					n2Ave = n2Ave + analyze.NU.N[j];
 				}
-				N2ave = N2ave/j;
-				temp = temp + "                                 Average points/interval:     " + N2ave.ToString("N0");
+				n2Ave = n2Ave/j;
+				temp = temp + "                                 Average points/interval:     " + n2Ave.ToString("N0");
 				temp = temp + "                                 R^2: " + analyze.Total.RSquared;
 			} 
 			else

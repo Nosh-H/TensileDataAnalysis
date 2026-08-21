@@ -61,7 +61,7 @@ namespace DataAnalyzer.Plots
 			this.ClientSize = new System.Drawing.Size(742, 510);
 			this.Controls.Add(this.zg1);
 			this.Name = "Plot";
-			this.Text = Title;
+			this.Text = title;
 			this.Resize += new System.EventHandler(this.PlotResize);
 			this.Load += new System.EventHandler(this.PlotLoad);
 			this.ResumeLayout(false);

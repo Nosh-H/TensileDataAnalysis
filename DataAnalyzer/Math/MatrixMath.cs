@@ -51,7 +51,7 @@ namespace DataAnalyzer.Math
         	return c;
         }
 
-        public void gauss(double[,] A, double[,] B, int n, int C){
+        public void Gauss(double[,] A, double[,] B, int n, int C){
 //		L.A. Riddle 09/07/91
 //		This function solves simultaneous linear equations using Gauss
 //		Elimination with Scaled Partial Pivoting
@@ -61,7 +61,7 @@ namespace DataAnalyzer.Math
 //		(A) X = B
 //		X (1,n), is returned as pointer to B
 //		c = 0 for a column vector, 0 - n for n x n matrix...use successive calls
-//		//TODO: (LAR) fix error handling for guass subroutine
+//		//TODO: (LAR) fix error handling for gauss subroutine
 //		Return ERROR for singular matrix, consistent system
 //		or singular matrix, inconsistent system
 
@@ -81,7 +81,7 @@ namespace DataAnalyzer.Math
 		errorFlag = 0;
 		buffer = 0.000000001;
 		imax = 0;
-		// TODO:(LAR) determine what to do with optional arguement C:
+		// TODO:(LAR) determine what to do with optional argument C:
 		// initialize to zero for now...
 		//C = 0; //This term limited the solution to a column matrix SES
 		for (i = 0; i<n;i++){
@@ -159,13 +159,13 @@ namespace DataAnalyzer.Math
 					B[i,C] = 0.0;
 				}
 			}
-		} // end gauss        
-    
-	
-	
+		} // end Gauss
+
+
+
       	public double[,] InvertMatrix(double[,] inMatrix, double[,] outMatrix, int nRows,int nCols){
-    		int I;
-   			int j; 
+    		int i;
+   			int j;
     		int k;
  			double[,] callMatrix = new double[nRows,nCols];
     	 	// fill inverse matrix with the identity matrix...
@@ -180,14 +180,14 @@ namespace DataAnalyzer.Math
     			}
     		}
     		// loop over columns of the inverse matrix
-    		for (I = 0; I < nCols; I++){  //column loop make the surrogate copy of ABD_inv:
+    		for (i = 0; i < nCols; i++){  //column loop make the surrogate copy of ABD_inv:
         		for (j = 0; j < nCols; j++){
             		for (k = 0; k < nRows; k++){
     					callMatrix[k, j] = inMatrix[k, j];
     				}
     			}
     			MatrixMath math = new MatrixMath();
-    			math.gauss(callMatrix, outMatrix, nCols, I); // calculate inverse column j
+    			math.Gauss(callMatrix, outMatrix, nCols, i); // calculate inverse column j
     		}
     		return outMatrix; //return outmatrix
 		}

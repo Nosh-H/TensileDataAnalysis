@@ -8,7 +8,7 @@
  */
 namespace DataAnalyzer.Plots
 {
-	partial class PreSreening
+	partial class PreScreening
 	{
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.
@@ -74,7 +74,7 @@ namespace DataAnalyzer.Plots
             this.tbStartIndex.Name = "tbStartIndex";
             this.tbStartIndex.Size = new System.Drawing.Size(302, 45);
             this.tbStartIndex.TabIndex = 1;
-            this.tbStartIndex.Scroll += new System.EventHandler(this.tbStartIndex_Scroll);
+            this.tbStartIndex.Scroll += new System.EventHandler(this.TbStartIndexScroll);
             // 
             // tbEndIndex
             // 
@@ -83,7 +83,7 @@ namespace DataAnalyzer.Plots
             this.tbEndIndex.Name = "tbEndIndex";
             this.tbEndIndex.Size = new System.Drawing.Size(304, 45);
             this.tbEndIndex.TabIndex = 2;
-            this.tbEndIndex.Scroll += new System.EventHandler(this.tbEndIndex_Scroll);
+            this.tbEndIndex.Scroll += new System.EventHandler(this.TbEndIndexScroll);
             // 
             // lMinStart
             // 
@@ -139,7 +139,7 @@ namespace DataAnalyzer.Plots
             this.label2.TabIndex = 8;
             this.label2.Text = "Index of End";
             // 
-            // PreSreening
+            // PreScreening
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -153,7 +153,7 @@ namespace DataAnalyzer.Plots
             this.Controls.Add(this.tbEndIndex);
             this.Controls.Add(this.tbStartIndex);
             this.Controls.Add(this.zg2);
-            this.Name = "PreSreening";
+            this.Name = "PreScreening";
             this.Text = "Preview";
             this.Load += new System.EventHandler(this.Zg2Load);
             ((System.ComponentModel.ISupportInitialize)(this.tbStartIndex)).EndInit();

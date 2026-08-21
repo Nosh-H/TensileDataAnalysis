@@ -16,9 +16,10 @@ using DataAnalyzer;
 namespace DataAnalyzer.Plots
 {
 	/// <summary>
-	/// Description of Form1.
+	/// A scatter-plot preview of a specimen's raw data before it's added to the analysis, with
+	/// trackbars to adjust which rows are included.
 	/// </summary>
-	public partial class PreSreening : Form
+	public partial class PreScreening : Form
 	{
 		string root;
 		int axChan, tranChan, dispflag, stressCol, strainCol;
@@ -33,7 +34,7 @@ namespace DataAnalyzer.Plots
         private readonly int absoluteMinIndex;
         private readonly FileReader fullData;
 
-		public PreSreening(string inroot, int inaxChan, int intranChan,
+		public PreScreening(string inroot, int inaxChan, int intranChan,
 		                  double inlength, double inxSecArea, int inrowStart, int inrowEnd, int minIndex, int maxIndex, int inStrainCol, int inStressCol, int indispflag)
 		{
 			root = inroot;
@@ -63,12 +64,12 @@ namespace DataAnalyzer.Plots
             tbEndIndex.Minimum = rowStart + 1;
             lMaxEnd.Text = Convert.ToString(maxIndex);
 
-			setTickBoxes();
+			SetTickBoxes();
 
 			fullData = new FileReader(root, axChan, tranChan, length, xSecArea, minIndex, maxIndex, strainCol, stressCol, dispflag);
 
 			// Ensure CreateChart runs after fullData is initialized
-			this.Shown += new EventHandler(PreSreening_Shown);
+			this.Shown += new EventHandler(PreScreeningShown);
 		}
 
 		void Zg2Load(object sender, EventArgs e)
@@ -77,7 +78,7 @@ namespace DataAnalyzer.Plots
 			if (fullData != null) CreateChart( zg2 );
 		}
 
-		private void PreSreening_Shown(object sender, EventArgs e)
+		private void PreScreeningShown(object sender, EventArgs e)
 		{
 			CreateChart(zg2);
 		}
@@ -146,7 +147,7 @@ namespace DataAnalyzer.Plots
             zgc.Invalidate();
 		}
 		
-        private void setTickBoxes()
+        private void SetTickBoxes()
         {
             tbStartIndex.Maximum = rowEnd - 1;
             lMaxStart.Text = Convert.ToString(rowEnd - 1);
@@ -158,17 +159,17 @@ namespace DataAnalyzer.Plots
             label2.Text = "End @ " + rowEnd;
 
         }
-        private void tbEndIndex_Scroll(object sender, EventArgs e)
+        private void TbEndIndexScroll(object sender, EventArgs e)
         {
             rowEnd = tbEndIndex.Value;
-            setTickBoxes();
+            SetTickBoxes();
             CreateChart(zg2);
         }
 
-        private void tbStartIndex_Scroll(object sender, EventArgs e)
+        private void TbStartIndexScroll(object sender, EventArgs e)
         {
             rowStart = tbStartIndex.Value;
-            setTickBoxes();
+            SetTickBoxes();
             CreateChart(zg2);
         }
     }

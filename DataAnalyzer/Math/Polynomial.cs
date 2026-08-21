@@ -18,12 +18,12 @@ namespace DataAnalyzer.Math
 	public class Polynomial
 	{
 		public static double EvaluatePolynomial(double inX, double[,] inC){
-    		int I;
-    		int PolynomialOrder;
+    		int i;
+    		int polynomialOrder;
     		double evaluatePolynomial = 0;
-    		PolynomialOrder = inC.GetUpperBound(0);
-    		for (I = 0; I < PolynomialOrder+1; I++){
-    			evaluatePolynomial = evaluatePolynomial + inC[I, 0] * System.Math.Pow(inX,I);
+    		polynomialOrder = inC.GetUpperBound(0);
+    		for (i = 0; i < polynomialOrder+1; i++){
+    			evaluatePolynomial = evaluatePolynomial + inC[i, 0] * System.Math.Pow(inX,i);
     		}
     		return evaluatePolynomial;
 		}
@@ -43,7 +43,7 @@ namespace DataAnalyzer.Math
                           out double[,] Cout, out double[] SEi,
                           out double Rsquared, out double residualSumSquared)
         {
-            int I;
+            int i;
             int j;
             int k;
             long inCount = inX.Length;
@@ -68,27 +68,27 @@ namespace DataAnalyzer.Math
             }
 
             // Initialize coefficient matrices
-            for (I = 0; I < inPolynomialOrder + 1; I++)
+            for (i = 0; i < inPolynomialOrder + 1; i++)
             {
                 for (j = 0; j < inPolynomialOrder + 1; j++)
                 {
-                    a[I, j] = 0;
+                    a[i, j] = 0;
                 }
-                b[I, 0] = 0;
+                b[i, 0] = 0;
             }
 
-            for (I = 0; I < inPolynomialOrder + 1; I++)
+            for (i = 0; i < inPolynomialOrder + 1; i++)
             {
                 for (j = 0; j < inPolynomialOrder + 1; j++)
                 {
                     for (k = 0; k < inCount; k++)
                     {
-                        a[I, j] += System.Math.Pow(inX[k], (j + I));
+                        a[i, j] += System.Math.Pow(inX[k], (j + i));
                     }
                 }
                 for (k = 0; k < inCount; k++)
                 {
-                    b[I, 0] += inY[k] * System.Math.Pow(inX[k], (I));
+                    b[i, 0] += inY[k] * System.Math.Pow(inX[k], (i));
                 }
             }
 
@@ -101,27 +101,27 @@ namespace DataAnalyzer.Math
                                          inPolynomialOrder + 1, inPolynomialOrder + 1, 1);
 
             // Calculate residuals and Residual Sum of Squares
-            for (I = 0; I < inCount; I++)
+            for (i = 0; i < inCount; i++)
             {
-                residual = EvaluatePolynomial(inX[I], Cout) - inY[I];
+                residual = EvaluatePolynomial(inX[i], Cout) - inY[i];
                 residualSumSquared += System.Math.Pow(residual, 2);
-                Ybar += inY[I];
+                Ybar += inY[i];
             }
 
             Ybar /= inCount;
 
             // Calculate standard errors on coefficients
             SEySquared = residualSumSquared / (inX.Length - (inPolynomialOrder + 1));
-            for (I = 0; I < inPolynomialOrder + 1; I++)
+            for (i = 0; i < inPolynomialOrder + 1; i++)
             {
-                double temp = System.Math.Abs(Aout[I, I]);
-                SEi[I] = System.Math.Sqrt(SEySquared * temp);
+                double temp = System.Math.Abs(Aout[i, i]);
+                SEi[i] = System.Math.Sqrt(SEySquared * temp);
             }
 
             // Calculate the total sum of squares
-            for (I = 0; I < inCount; I++)
+            for (i = 0; i < inCount; i++)
             {
-                VarYaboutMean = inY[I] - Ybar;
+                VarYaboutMean = inY[i] - Ybar;
                 SSyy += System.Math.Pow(VarYaboutMean, 2);
             }
 

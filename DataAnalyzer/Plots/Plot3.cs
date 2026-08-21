@@ -22,30 +22,30 @@ namespace DataAnalyzer.Plots
 		PointPairList list1 = new PointPairList();
 		PointPairList list2 = new PointPairList();
 		PointPairList list3 = new PointPairList();
-		string Title = "Titleless";
-		string XTitle = "Titleless";
-		string YTitle = "Titleless";
-		string DataLabel1 = "No Label";
-		string DataLabel2 = "No Label";
-		string DataLabel3 = "No Label";
-				
-		public Plot3(PointPairList List1, PointPairList List2, PointPairList List3, 
-		             string title, string Xtitle, string Ytitle, 
-		             string datalabel1, string datalabel2, string datalabel3)
+		string title = "Titleless";
+		string xTitle = "Titleless";
+		string yTitle = "Titleless";
+		string dataLabel1 = "No Label";
+		string dataLabel2 = "No Label";
+		string dataLabel3 = "No Label";
+
+		public Plot3(PointPairList list1, PointPairList list2, PointPairList list3,
+		             string title, string xTitle, string yTitle,
+		             string dataLabel1, string dataLabel2, string dataLabel3)
 		{
-			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed, 
+			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed,
 			// and inX3, inY3 represent the LOESS points for the data.
 			//
-			list1 = List1;
-			list2 = List2;
-			list3 = List3;
-			Title = title;
-			XTitle = Xtitle;
-			YTitle = Ytitle;
-			DataLabel1 = datalabel1;
-			DataLabel2 = datalabel2;
-			DataLabel3 = datalabel3;
-			
+			this.list1 = list1;
+			this.list2 = list2;
+			this.list3 = list3;
+			this.title = title;
+			this.xTitle = xTitle;
+			this.yTitle = yTitle;
+			this.dataLabel1 = dataLabel1;
+			this.dataLabel2 = dataLabel2;
+			this.dataLabel3 = dataLabel3;
+
 			InitializeComponent();
 			Activate();
 			Show();
@@ -61,9 +61,9 @@ namespace DataAnalyzer.Plots
 			GraphPane myPane = zgc.GraphPane;
 
    			// Set the title and axis labels
-   			myPane.Title.Text = Title + " : " + DateTime.Now.ToString();
-   			myPane.XAxis.Title.Text = XTitle;
-   			myPane.YAxis.Title.Text = YTitle;
+   			myPane.Title.Text = title + " : " + DateTime.Now.ToString();
+   			myPane.XAxis.Title.Text = xTitle;
+   			myPane.YAxis.Title.Text = yTitle;
     
    			// Make up some data arrays based on the Sine function
    			/*PointPairList list1 = new PointPairList();
@@ -81,9 +81,9 @@ namespace DataAnalyzer.Plots
    			}
     */
    			// Generate a red curve with diamond
-   			LineItem myCurve3 = myPane.AddCurve( DataLabel3, list3, Color.Black, SymbolType.Diamond );
-   			LineItem myCurve2 = myPane.AddCurve( DataLabel2,	list2, Color.Blue, SymbolType.Circle );
-   			LineItem myCurve1 = myPane.AddCurve( DataLabel1,	list1, Color.Red, SymbolType.Circle );
+   			LineItem myCurve3 = myPane.AddCurve( dataLabel3, list3, Color.Black, SymbolType.Diamond );
+   			LineItem myCurve2 = myPane.AddCurve( dataLabel2,	list2, Color.Blue, SymbolType.Circle );
+   			LineItem myCurve1 = myPane.AddCurve( dataLabel1,	list1, Color.Red, SymbolType.Circle );
    			   			  			
    			// Don't display the line (This makes a scatter plot)
     		myCurve1.Line.IsVisible = false;

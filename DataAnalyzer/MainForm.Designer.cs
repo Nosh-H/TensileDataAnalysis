@@ -107,7 +107,7 @@ namespace DataAnalyzer
             this.materialTxtBox = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.plotGroupBox = new System.Windows.Forms.GroupBox();
-            this.bZeroeingPlot = new System.Windows.Forms.Button();
+            this.bZeroingPlot = new System.Windows.Forms.Button();
             this.bExtrapolationPlot = new System.Windows.Forms.Button();
             this.YieldStressBttn = new System.Windows.Forms.Button();
             this.plotBttn = new System.Windows.Forms.Button();
@@ -424,7 +424,7 @@ namespace DataAnalyzer
             this.tranStrainRadioButton.TabIndex = 0;
             this.tranStrainRadioButton.Text = "Strain";
             this.tranStrainRadioButton.UseVisualStyleBackColor = true;
-            this.tranStrainRadioButton.CheckedChanged += new System.EventHandler(this.tranStrainRadioButtonCheckedChanged);
+            this.tranStrainRadioButton.CheckedChanged += new System.EventHandler(this.TranStrainRadioButtonCheckedChanged);
             // 
             // axChanGroupBox
             // 
@@ -689,7 +689,7 @@ namespace DataAnalyzer
             this.cbYieldStress.TabIndex = 43;
             this.cbYieldStress.Text = "Yield Stress?";
             this.cbYieldStress.UseVisualStyleBackColor = true;
-            this.cbYieldStress.CheckedChanged += new System.EventHandler(this.cbYieldStress_CheckedChanged);
+            this.cbYieldStress.CheckedChanged += new System.EventHandler(this.CbYieldStressCheckedChanged);
             // 
             // tbMinPts
             // 
@@ -813,7 +813,7 @@ namespace DataAnalyzer
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(127, 17);
             this.label24.TabIndex = 37;
-            this.label24.Text = "Zeroeing";
+            this.label24.Text = "Zeroing";
             // 
             // locPolyOrderTxtBx
             // 
@@ -876,7 +876,7 @@ namespace DataAnalyzer
             // 
             this.plotGroupBox.BackColor = System.Drawing.SystemColors.Control;
             this.plotGroupBox.Controls.Add(this.bExtrapolationPlot);
-            this.plotGroupBox.Controls.Add(this.bZeroeingPlot);
+            this.plotGroupBox.Controls.Add(this.bZeroingPlot);
             this.plotGroupBox.Controls.Add(this.YieldStressBttn);
             this.plotGroupBox.Controls.Add(this.plotBttn);
             this.plotGroupBox.Controls.Add(this.groupBox2);
@@ -891,16 +891,16 @@ namespace DataAnalyzer
             this.plotGroupBox.Text = "Plotting Options";
             this.plotGroupBox.Visible = false;
             // 
-            // bZeroeingPlot
+            // bZeroingPlot
             // 
-            this.bZeroeingPlot.Enabled = false;
-            this.bZeroeingPlot.Location = new System.Drawing.Point(233, 79);
-            this.bZeroeingPlot.Name = "bZeroeingPlot";
-            this.bZeroeingPlot.Size = new System.Drawing.Size(75, 23);
-            this.bZeroeingPlot.TabIndex = 7;
-            this.bZeroeingPlot.Text = "Zeroeing";
-            this.bZeroeingPlot.UseVisualStyleBackColor = true;
-            this.bZeroeingPlot.Click += new System.EventHandler(this.bZeroeingPlot_Click);
+            this.bZeroingPlot.Enabled = false;
+            this.bZeroingPlot.Location = new System.Drawing.Point(233, 79);
+            this.bZeroingPlot.Name = "bZeroingPlot";
+            this.bZeroingPlot.Size = new System.Drawing.Size(75, 23);
+            this.bZeroingPlot.TabIndex = 7;
+            this.bZeroingPlot.Text = "Zeroing";
+            this.bZeroingPlot.UseVisualStyleBackColor = true;
+            this.bZeroingPlot.Click += new System.EventHandler(this.BZeroingPlotClick);
             // 
             // YieldStressBttn
             // 
@@ -929,7 +929,7 @@ namespace DataAnalyzer
             this.bExtrapolationPlot.TabIndex = 49;
             this.bExtrapolationPlot.Text = "Plot Extrapolation";
             this.bExtrapolationPlot.UseVisualStyleBackColor = true;
-            this.bExtrapolationPlot.Click += new System.EventHandler(this.bExtrapolationPlot_Click);
+            this.bExtrapolationPlot.Click += new System.EventHandler(this.BExtrapolationPlotClick);
             this.plotBttn.UseVisualStyleBackColor = true;
             this.plotBttn.Click += new System.EventHandler(this.PlotBttnClick);
             // 
@@ -1364,7 +1364,7 @@ namespace DataAnalyzer
         private System.Windows.Forms.Label label28;
         private System.Windows.Forms.TextBox locPolyOrderTxtBx;
         private System.Windows.Forms.CheckBox cbYieldStress;
-        private System.Windows.Forms.Button bZeroeingPlot;
+        private System.Windows.Forms.Button bZeroingPlot;
         private System.Windows.Forms.Button bExtrapolationPlot;
     }
 }

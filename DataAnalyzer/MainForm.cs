@@ -394,7 +394,7 @@ namespace DataAnalyzer
 			axChan.Text = "1";
 			dispflag = 1;
 		}
-		void tranStrainRadioButtonCheckedChanged(object sender, EventArgs e){
+		void TranStrainRadioButtonCheckedChanged(object sender, EventArgs e){
 			tranChanGroupBox.Visible = true;
 			tranChan.Text = "1";
 		}
@@ -414,7 +414,7 @@ namespace DataAnalyzer
 					? Convert.ToInt32(rowStartTxtBox.Text) : firstIndex;
 				int rowEnd = Convert.ToInt32(rowEndTxtBox.Text) < lastIndex && Convert.ToInt32(rowEndTxtBox.Text)  > rowStart
 					? Convert.ToInt32(rowEndTxtBox.Text) : lastIndex;
-				PreSreening ps1 = new PreSreening(openFileTxt.Text, Convert.ToInt32(axChan.Text),
+				PreScreening ps1 = new PreScreening(openFileTxt.Text, Convert.ToInt32(axChan.Text),
 			                                  Convert.ToInt32(tranChan.Text),
 			                                  Convert.ToDouble(lengthTxtBox.Text), 
 			                                  Convert.ToDouble(xSecAreaTxtBox.Text),
@@ -427,7 +427,7 @@ namespace DataAnalyzer
             	return;
             }
 			catch(IndexOutOfRangeException){
-				MessageBox.Show("There are less columns in the data than specified: Verify channels and starting row are correct");
+				MessageBox.Show("There are fewer columns in the data than specified: Verify channels and starting row are correct");
 				return;
 			}
 			catch{
@@ -457,7 +457,7 @@ namespace DataAnalyzer
             	return;
             }
 			catch(IndexOutOfRangeException){
-				MessageBox.Show("There are less columns in the data than specified: Verify channels and starting row are correct");
+				MessageBox.Show("There are fewer columns in the data than specified: Verify channels and starting row are correct");
 				return;
 			}
 			catch{
@@ -626,7 +626,7 @@ namespace DataAnalyzer
 			}
 			catch(AccessViolationException){
 				MessageBox.Show("Warning: One or more intervals doesn't have enough points/interval to generate " +
-				                "polynomial: reduce polynomial order or increasse interval size");
+				                "polynomial: reduce polynomial order or increase interval size");
 				plotGroupBox.Visible = false;
 				dataFilesGroupBox.Visible = false;
 				return;
@@ -686,7 +686,7 @@ namespace DataAnalyzer
 		void FileNumRadioBttn1CheckedChanged(object sender, EventArgs e)
 		{
 			fileNumberBox.Enabled = true;
-			bZeroeingPlot.Enabled = true;
+			bZeroingPlot.Enabled = true;
             if (cbYieldStress.Checked == true)
             {
 				YieldStressBttn.Enabled = true;
@@ -697,7 +697,7 @@ namespace DataAnalyzer
 		void AllRadioBttnCheckedChanged(object sender, EventArgs e)
 		{
 			fileNumberBox.Enabled = false;
-            bZeroeingPlot.Enabled = false;
+            bZeroingPlot.Enabled = false;
             YieldStressBttn.Enabled = false;
 			fileNumber = 0;
 		}
@@ -819,13 +819,13 @@ namespace DataAnalyzer
 			pm.PlotMaker15();
 		}
 
-        private void cbYieldStress_CheckedChanged(object sender, EventArgs e)
+        private void CbYieldStressCheckedChanged(object sender, EventArgs e)
         {
 			lOffset.Enabled = cbYieldStress.Checked;
 			offsetPercentTxtBx.Enabled = cbYieldStress.Checked;
         }
 
-        private void bExtrapolationPlot_Click(object sender, EventArgs e)
+        private void BExtrapolationPlotClick(object sender, EventArgs e)
         {
             //Plot the pooled zeroed data extended out to the common strain, plus the LOESS mean
             //points and global fit through it.  Stress/strain, and transverse/axial if it exists.
@@ -837,7 +837,7 @@ namespace DataAnalyzer
             }
         }
 
-        private void bZeroeingPlot_Click(object sender, EventArgs e)
+        private void BZeroingPlotClick(object sender, EventArgs e)
         {
             //Plot raw data, zeroed data, data used for linear fit, and linear fit
             fileNumber = (int)fileNumberBox.Value;

@@ -37,7 +37,7 @@ namespace DataAnalyzer.Math
 		private Combination nu;
 
 		private double [,] combinedDataExtrapolated;
-		private double [,] combiedNuDataExtrapolated;
+		private double [,] combinedNuDataExtrapolated;
 		private Combination totalExtrapolated;
 		private Combination nuExtrapolated;
 		
@@ -50,7 +50,7 @@ namespace DataAnalyzer.Math
 		/// 5th the temperature, 6th the # of files scanned in, 7th the # of those with transverse
 		/// gauges, 8th the # of trailing points used for extrapolation, and 9th the common x value
 		/// every curve is extrapolated out to.
-		/// Also, takes in the offest array: 1st element is 0 if not an option
+		/// Also, takes in the offset array: 1st element is 0 if not an option
 		/// </summary>
 		/// <param name="individualInputsList"></param>
 		/// <param name="groupInputsList"></param>
@@ -81,7 +81,7 @@ namespace DataAnalyzer.Math
 			chanStress = new int [numberofFiles];
 			dispflag = new int [numberofFiles];
 
-			//split up the input array into seperate arrays and variables
+			//split up the input array into separate arrays and variables
 
 			// Group-level settings that apply to every specimen in this run (set once from the
 			// "group inputs" the user entered, not per-file).
@@ -221,8 +221,8 @@ namespace DataAnalyzer.Math
 				// Same call, but over the transverse zeroers: here x is still axial strain
 				// (column 1) and y is transverse strain (column 0), so the pooled fit's slope is
 				// the extrapolated Poisson's ratio rather than a modulus.
-				combiedNuDataExtrapolated = ExtrapolateAndPool(zeroNUData, numberofTranFiles, n, xCommon);
-				nuExtrapolated = new Combination(combiedNuDataExtrapolated, locPolyOrder, globPolyOrder, interval);
+				combinedNuDataExtrapolated = ExtrapolateAndPool(zeroNUData, numberofTranFiles, n, xCommon);
+				nuExtrapolated = new Combination(combinedNuDataExtrapolated, locPolyOrder, globPolyOrder, interval);
 			}
 		}
 
@@ -366,7 +366,7 @@ namespace DataAnalyzer.Math
 			get{return combinedNUData;}
 		}
 		public double [,] CombinedNUDataExtrapolated{
-			get{return combiedNuDataExtrapolated;}
+			get{return combinedNuDataExtrapolated;}
 		}
 		public Zeroer[] ZeroNUData{
 			get{return zeroNUData;}

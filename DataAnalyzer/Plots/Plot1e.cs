@@ -21,27 +21,27 @@ namespace DataAnalyzer.Plots
 	{
 		PointPairList list1 = new PointPairList();
 		PointPairList list1e = new PointPairList();
-		string Title = "Titleless";
-		string XTitle = "Titleless";
-		string YTitle = "Titleless";
-		string DataLabel1 = "No Label";
-		string DataLabel1e = "No Label";
-				
-		public Plot1e(PointPairList List1, PointPairList List1e, 
-		             string title, string Xtitle, string Ytitle, 
-		             string datalabel1, string datalabel1e)
+		string title = "Titleless";
+		string xTitle = "Titleless";
+		string yTitle = "Titleless";
+		string dataLabel1 = "No Label";
+		string dataLabel1e = "No Label";
+
+		public Plot1e(PointPairList list1, PointPairList list1e,
+		             string title, string xTitle, string yTitle,
+		             string dataLabel1, string dataLabel1e)
 		{
-			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed, 
+			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed,
 			// and inX3, inY3 represent the LOESS points for the data.
 			//
-			list1 = List1;
-			list1e = List1e;
-			Title = title;
-			XTitle = Xtitle;
-			YTitle = Ytitle;
-			DataLabel1 = datalabel1;
-			DataLabel1e = datalabel1e;
-			
+			this.list1 = list1;
+			this.list1e = list1e;
+			this.title = title;
+			this.xTitle = xTitle;
+			this.yTitle = yTitle;
+			this.dataLabel1 = dataLabel1;
+			this.dataLabel1e = dataLabel1e;
+
 			InitializeComponent();
 			Activate();
 			Show();
@@ -57,12 +57,12 @@ namespace DataAnalyzer.Plots
 			GraphPane myPane = zgc.GraphPane;
 
    			// Set the title and axis labels
-   			myPane.Title.Text = Title + " : " + DateTime.Now.ToString();
-   			myPane.XAxis.Title.Text = XTitle;
-   			myPane.YAxis.Title.Text = YTitle;
-    
-   			
-   			LineItem myCurve1 = myPane.AddCurve( DataLabel1, list1, Color.Black, SymbolType.Diamond );
+   			myPane.Title.Text = title + " : " + DateTime.Now.ToString();
+   			myPane.XAxis.Title.Text = xTitle;
+   			myPane.YAxis.Title.Text = yTitle;
+
+
+   			LineItem myCurve1 = myPane.AddCurve( dataLabel1, list1, Color.Black, SymbolType.Diamond );
    			   			   			  			
    			// Don't display the line (This makes a scatter plot)
     		myCurve1.Line.IsVisible = false;
@@ -72,7 +72,7 @@ namespace DataAnalyzer.Plots
     		myCurve1.Symbol.Fill = new Fill( Color.Red );
     		
     		// Generate a red bar with "Curve 1" in the legend
-   			ErrorBarItem myCurve1e = myPane.AddErrorBar( DataLabel1e, list1e, Color.Black );
+   			ErrorBarItem myCurve1e = myPane.AddErrorBar( dataLabel1e, list1e, Color.Black );
    			myCurve1e.Bar.PenWidth = 1f;
    			// Use the HDash symbol so that the error bars look like I-beams
    			myCurve1e.Bar.Symbol.Type = SymbolType.HDash;

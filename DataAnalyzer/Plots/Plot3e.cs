@@ -23,33 +23,33 @@ namespace DataAnalyzer.Plots
 		PointPairList list2 = new PointPairList();
 		PointPairList list2e = new PointPairList();
 		PointPairList list3 = new PointPairList();
-		string Title = "Titleless";
-		string XTitle = "Titleless";
-		string YTitle = "Titleless";
-		string DataLabel1 = "No Label";
-		string DataLabel2 = "No Label";
-		string DataLabel2e = "No Label";
-		string DataLabel3 = "No Label";
-				
-		public Plot3e(PointPairList List1, PointPairList List2, PointPairList List2e, 
-		             PointPairList List3, string title, string Xtitle, string Ytitle, 
-		             string datalabel1, string datalabel2, string datalabel2e, string datalabel3)
+		string title = "Titleless";
+		string xTitle = "Titleless";
+		string yTitle = "Titleless";
+		string dataLabel1 = "No Label";
+		string dataLabel2 = "No Label";
+		string dataLabel2e = "No Label";
+		string dataLabel3 = "No Label";
+
+		public Plot3e(PointPairList list1, PointPairList list2, PointPairList list2e,
+		             PointPairList list3, string title, string xTitle, string yTitle,
+		             string dataLabel1, string dataLabel2, string dataLabel2e, string dataLabel3)
 		{
-			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed, 
+			//inX1,inY1 are the raw data, inX2,inY2 represents the data after outliers have been removed,
 			// and inX3, inY3 represent the LOESS points for the data.
 			//
-			list1 = List1;
-			list2 = List2;
-			list2e = List2e;
-			list3 = List3;
-			Title = title;
-			XTitle = Xtitle;
-			YTitle = Ytitle;
-			DataLabel1 = datalabel1;
-			DataLabel2 = datalabel2;
-			DataLabel2e = datalabel2e;
-			DataLabel3 = datalabel3;
-			
+			this.list1 = list1;
+			this.list2 = list2;
+			this.list2e = list2e;
+			this.list3 = list3;
+			this.title = title;
+			this.xTitle = xTitle;
+			this.yTitle = yTitle;
+			this.dataLabel1 = dataLabel1;
+			this.dataLabel2 = dataLabel2;
+			this.dataLabel2e = dataLabel2e;
+			this.dataLabel3 = dataLabel3;
+
 			InitializeComponent();
 			Activate();
 			Show();
@@ -65,14 +65,14 @@ namespace DataAnalyzer.Plots
 			GraphPane myPane = zgc.GraphPane;
 
    			// Set the title and axis labels
-   			myPane.Title.Text = Title + " : " + DateTime.Now.ToString();
-   			myPane.XAxis.Title.Text = XTitle;
-   			myPane.YAxis.Title.Text = YTitle;
-    
-   			
-   			LineItem myCurve2 = myPane.AddCurve( DataLabel2, list2, Color.Black, SymbolType.Diamond );
-   			LineItem myCurve1 = myPane.AddCurve( DataLabel1,	list1, Color.Red, SymbolType.Circle );
-   			LineItem myCurve3 = myPane.AddCurve( DataLabel3, list3, Color.Green, SymbolType.Diamond );
+   			myPane.Title.Text = title + " : " + DateTime.Now.ToString();
+   			myPane.XAxis.Title.Text = xTitle;
+   			myPane.YAxis.Title.Text = yTitle;
+
+
+   			LineItem myCurve2 = myPane.AddCurve( dataLabel2, list2, Color.Black, SymbolType.Diamond );
+   			LineItem myCurve1 = myPane.AddCurve( dataLabel1,	list1, Color.Red, SymbolType.Circle );
+   			LineItem myCurve3 = myPane.AddCurve( dataLabel3, list3, Color.Green, SymbolType.Diamond );
    			
    			// Don't display the line (This makes a scatter plot)
     		myCurve1.Line.IsVisible = false;
@@ -86,7 +86,7 @@ namespace DataAnalyzer.Plots
     		myCurve2.Symbol.Fill = new Fill( Color.Black );
     		
     		// Generate a red bar with "Curve 1" in the legend
-   			ErrorBarItem myCurve2e = myPane.AddErrorBar( DataLabel2e, list2e, Color.Black );
+   			ErrorBarItem myCurve2e = myPane.AddErrorBar( dataLabel2e, list2e, Color.Black );
    			myCurve2e.Bar.PenWidth = 1f;
    			// Use the HDash symbol so that the error bars look like I-beams
    			myCurve2e.Bar.Symbol.Type = SymbolType.HDash;

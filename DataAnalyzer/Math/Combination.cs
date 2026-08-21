@@ -12,7 +12,8 @@ using System;
 namespace DataAnalyzer.Math
 {
 	/// <summary>
-	/// Description of Combiner.
+	/// Pools every specimen's zeroed data into one array and refits a single LOESS + global
+	/// polynomial curve across all of it, giving the material's overall response.
 	/// </summary>
 	public class Combination
 	{
@@ -33,7 +34,7 @@ namespace DataAnalyzer.Math
 		{
 			//This class takes in the combined data, desired polynomial order (local and global), 
 			//and loess interval, and puts it through the loess program to get a set of mean
-			// points (x and y), along with errors for the coefficentof the polynomial for for each interval
+			// points (x and y), along with errors for the coefficient of the polynomial for each interval
 			
 			int i;
 			double [] inX = new double[inData.GetUpperBound(0)+1];
@@ -44,13 +45,13 @@ namespace DataAnalyzer.Math
     		}
     		Array.Sort(inX, inY);
     		double dNumberofIntervals = (System.Math.Floor(2*(inX[inX.Length-1] - inX[0])/(interval))) - 1;
-    		int NumberofIntervals = System.Convert.ToInt16(dNumberofIntervals);
-    		double [] Ybar = new double [NumberofIntervals];
-    		sigma = new double [NumberofIntervals];
-    		double [] Xbar = new double [NumberofIntervals];
-    		n = new double [NumberofIntervals];
-    		coefficients = new double [NumberofIntervals, locPolyOrder+1];
-    		seCoefficients = new double [NumberofIntervals, locPolyOrder+1];
+    		int numberofIntervals = System.Convert.ToInt16(dNumberofIntervals);
+    		double [] Ybar = new double [numberofIntervals];
+    		sigma = new double [numberofIntervals];
+    		double [] Xbar = new double [numberofIntervals];
+    		n = new double [numberofIntervals];
+    		coefficients = new double [numberofIntervals, locPolyOrder+1];
+    		seCoefficients = new double [numberofIntervals, locPolyOrder+1];
     		
     		LOESS myLOESS = new LOESS();
 			myLOESS.LOESSAnalysis(locPolyOrder, interval, inX, inY, ref Ybar,

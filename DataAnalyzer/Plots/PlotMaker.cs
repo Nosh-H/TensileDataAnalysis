@@ -27,12 +27,12 @@ namespace DataAnalyzer.Plots
 		private string temperature, material;
 		private double temp;
 		
-		public PlotMaker(Analyze Analyze, int NumberofFiles, string Temperature, string Material, int FileNumber){
-			analyze = Analyze;
-			numberofFiles = NumberofFiles;
-			material = Material;
-			temperature = Temperature;
-			fileNumber = FileNumber;
+		public PlotMaker(Analyze analyze, int numberofFiles, string temperature, string material, int fileNumber){
+			this.analyze = analyze;
+			this.numberofFiles = numberofFiles;
+			this.material = material;
+			this.temperature = temperature;
+			this.fileNumber = fileNumber;
 		}
 			
 		public void PlotMaker1(){
@@ -494,7 +494,7 @@ namespace DataAnalyzer.Plots
             {
                 zeroedList.Add(analyze.ZeroData[i].ZeroedData[j, 1], analyze.ZeroData[i].ZeroedData[j, 0]);
             }
-			//Raw Data used for Zeroeing.  RawDataForFit holds y in column 0 and x in column 1
+			//Raw Data used for Zeroing.  RawDataForFit holds y in column 0 and x in column 1
 			//(see Offset), so both components of the point come from that one array.
             for (j = 0; j < analyze.ZeroData[i].OffsetData.RawDataForFit.GetUpperBound(0) + 1; j++)
             {
@@ -516,7 +516,7 @@ namespace DataAnalyzer.Plots
 
 
             Plot5 pl5 = new Plot5(rawList, zeroedList, linearZeroedList, linearFit1, linearFit2, "Specimen " + fileNumber + ": " + material + ": " + temperature + "K ", "Strain",
-                                             "Stress", "Raw Data", "Zeroed", "Raw Data Used for Linear Fit", "Linear Fit for Zeroeing", "Linear Fit for Zeroed");
+                                             "Stress", "Raw Data", "Zeroed", "Raw Data Used for Linear Fit", "Linear Fit for Zeroing", "Linear Fit for Zeroed");
 
         }
 

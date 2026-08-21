@@ -59,13 +59,13 @@ namespace DataAnalyzer.Math
 			#endregion
 			
 			double dNumberofIntervals = (System.Math.Floor(2*(inX[inX.Length-1] - inX[0])/(interval))) - 1;
-			int NumberofIntervals = System.Convert.ToInt32(dNumberofIntervals);
-			double [] Ybar = new double [NumberofIntervals];
-			sigma = new double [NumberofIntervals];
-			double [] Xbar = new double [NumberofIntervals];
-			n = new double [NumberofIntervals];
-			coefficients = new double [NumberofIntervals, locPolyOrder+1];
-			seCoefficients = new double [NumberofIntervals, locPolyOrder+1];
+			int numberofIntervals = System.Convert.ToInt32(dNumberofIntervals);
+			double [] Ybar = new double [numberofIntervals];
+			sigma = new double [numberofIntervals];
+			double [] Xbar = new double [numberofIntervals];
+			n = new double [numberofIntervals];
+			coefficients = new double [numberofIntervals, locPolyOrder+1];
+			seCoefficients = new double [numberofIntervals, locPolyOrder+1];
 			
 			LOESS myLOESS = new LOESS();
 			myLOESS.LOESSAnalysis(locPolyOrder, interval, inX, inY, ref Ybar,

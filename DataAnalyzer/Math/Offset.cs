@@ -29,18 +29,18 @@ namespace DataAnalyzer.Math
 		private double offsetflag;
 		private	double strainOffset;
 		private double[,] rawDataForFit;
-		private Polynomial lineForZeroeing;
+		private Polynomial lineForZeroing;
         private int minPtsForFit;
 
         /// <summary>
         /// SES: This program executes whether the user has selected to calculate the offset or not, but it returns
-        /// right off the bat if the user did not check the offset box.It takes all of the combined data 
-        /// mean points, and fits a line to the points.It starts out with just the first point in the mean
+        /// right off the bat if the user did not check the offset box. It takes all of the combined data
+        /// mean points, and fits a line to the points. It starts out with just the first point in the mean
         /// data set, and adds points one by one, checking to make sure that the R^2 value is above the specified
         /// value.  This is to isolate the data that is sufficiently linear.  Once all of the data points which
         /// give a linear fit with an R^2 value higher than the user input, rMin, this line is adjusted in the
         /// x-direction by the offset (note: had to convert the % offset to microstrain).  Then, the intersection
-        /// is found between the global polynomial fit and the offset line.This intersection gives the offset
+        /// is found between the global polynomial fit and the offset line. This intersection gives the offset
         /// yield stress and strain.  If the offset intersection cannot be found, an exception is thrown,
         /// and caught in the main section.
         /// </summary>
@@ -59,7 +59,7 @@ namespace DataAnalyzer.Math
             //Initiate variables for the Polynomial Method
             int i,j;
 			int polyOrder = 1;
-    		lineForZeroeing = new Polynomial();
+    		lineForZeroing = new Polynomial();
     		double [] SEi;
 			double residualSumSquared;
 			double Rsquared = 1.0;
@@ -76,7 +76,7 @@ namespace DataAnalyzer.Math
 						inX[j] = inputX[j];
 						inY[j] = inputY[j];
 					}
-                    lineForZeroeing.PolynomialFit(polyOrder,inX,inY, out Cout_Linear, out SEi, out Rsquared, out residualSumSquared);
+                    lineForZeroing.PolynomialFit(polyOrder,inX,inY, out Cout_Linear, out SEi, out Rsquared, out residualSumSquared);
 				}
 			}
 
@@ -138,7 +138,7 @@ namespace DataAnalyzer.Math
 					throw new AppDomainUnloadedException();
 				}
 			}
-			//returns AppDomainUnloadedException if it doesn't find the interception, so that it can be identified at a higher level
+			//returns AppDomainUnloadedException if it doesn't find the intersection, so that it can be identified at a higher level
 			throw new AppDomainUnloadedException();
 		}
 
@@ -176,9 +176,9 @@ namespace DataAnalyzer.Math
         {
             get { return rawDataForFit; }
         }
-		public Polynomial LineForZeroeing
+		public Polynomial LineForZeroing
 		{ 
-			get { return lineForZeroeing; } 
+			get { return lineForZeroing; } 
 		}
     }
 }
